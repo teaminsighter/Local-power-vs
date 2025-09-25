@@ -30,6 +30,9 @@ export class BuildingInsightsService {
       const response = await fetch(url);
       
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`BUILDING_NOT_FOUND: Building data not available for this location`);
+        }
         const error = await response.json();
         console.error('Building insights API error:', error);
         throw new Error(`API Error: ${response.status} - ${error.error?.message || 'Unknown error'}`);

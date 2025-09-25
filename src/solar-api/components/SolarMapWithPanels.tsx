@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { ProcessedBuildingData, LivePanelCalculation } from '../types/building-insights';
 import { loadGoogleMapsAPI, isGoogleMapsLoaded } from '../utils/google-maps-loader';
 import MapFallback from './MapFallback';
+import SolarLayerManager from './SolarLayerManager';
+import { ProcessedSolarData } from '../services/data-layers';
 
 interface SolarMapWithPanelsProps {
   center: { lat: number; lng: number };
@@ -11,6 +13,7 @@ interface SolarMapWithPanelsProps {
   buildingData?: ProcessedBuildingData;
   panelCount: number;
   onDataUpdate: (data: LivePanelCalculation) => void;
+  isLoading?: boolean;
 }
 
 const SolarMapWithPanels = ({ 
@@ -18,7 +21,8 @@ const SolarMapWithPanels = ({
   onLocationChange, 
   buildingData,
   panelCount,
-  onDataUpdate
+  onDataUpdate,
+  isLoading = false
 }: SolarMapWithPanelsProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -26,6 +30,7 @@ const SolarMapWithPanels = ({
   const [panelMarkers, setPanelMarkers] = useState<google.maps.Marker[]>([]);
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [solarData, setSolarData] = useState<ProcessedSolarData | null>(null);
 
   // Load Google Maps API and initialize map
   useEffect(() => {
@@ -40,15 +45,17 @@ const SolarMapWithPanels = ({
           await loadGoogleMapsAPI();
         }
 
-        // Create the map
+        // Create the map with high zoom for detailed solar analysis
         const googleMap = new google.maps.Map(mapRef.current, {
           center: { lat: center.lat, lng: center.lng },
-          zoom: 21,
-          mapTypeId: 'satellite',
-          mapId: 'solar-map',
+          zoom: 21, // Maximum zoom for satellite detail
+          mapTypeId: 'satellite', // Always start with satellite
+          mapId: 'solar-map-analysis',
           disableDefaultUI: true,
           zoomControl: true,
-          gestureHandling: 'greedy'
+          scaleControl: true,
+          gestureHandling: 'greedy',
+          tilt: 0 // Disable 3D tilt for accurate analysis
         });
 
         setMap(googleMap);
@@ -74,12 +81,28 @@ const SolarMapWithPanels = ({
       draggable: true,
       title: 'Drag to analyze different roof locations',
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 8,
-        fillColor: '#146442',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 2
+        url: 'data:image/svg+xml;base64,' + btoa(`
+          <svg width=\"40\" height=\"52\" viewBox=\"0 0 40 52\" xmlns=\"http://www.w3.org/2000/svg\">
+            <defs>
+              <linearGradient id=\"pinGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">
+                <stop offset=\"0%\" style=\"stop-color:#FF6B6B;stop-opacity:1\" />
+                <stop offset=\"100%\" style=\"stop-color:#E53E3E;stop-opacity:1\" />
+              </linearGradient>
+              <filter id=\"shadow\" x=\"-50%\" y=\"-50%\" width=\"200%\" height=\"200%\">
+                <dropShadow dx=\"2\" dy=\"4\" stdDeviation=\"3\" flood-color=\"rgba(0,0,0,0.3)\"/>
+              </filter>
+            </defs>
+            <!-- Pin body -->
+            <path d=\"M20 4C12.268 4 6 10.268 6 18c0 11.25 14 26 14 26s14-14.75 14-26C34 10.268 27.732 4 20 4z\" 
+                  fill=\"url(#pinGrad)\" stroke=\"white\" stroke-width=\"2\" filter=\"url(#shadow)\"/>
+            <!-- Inner circle -->
+            <circle cx=\"20\" cy=\"18\" r=\"6\" fill=\"white\" stroke=\"#E53E3E\" stroke-width=\"1.5\"/>
+            <!-- Center dot -->
+            <circle cx=\"20\" cy=\"18\" r=\"2.5\" fill=\"#E53E3E\"/>
+          </svg>
+        `),
+        scaledSize: new google.maps.Size(40, 52),
+        anchor: new google.maps.Point(20, 52)
       }
     });
 
@@ -104,7 +127,18 @@ const SolarMapWithPanels = ({
     }
   }, [center, marker, map]);
 
-  // Render solar panels on roof
+  // Handle solar data updates from layer manager
+  const handleSolarDataUpdate = (data: ProcessedSolarData | null) => {
+    setSolarData(data);
+    
+    // Enhanced calculations with real solar flux data
+    if (buildingData && onDataUpdate) {
+      const liveData = calculateLiveDataWithSolarFlux(buildingData, panelCount, data);
+      onDataUpdate(liveData);
+    }
+  };
+
+  // Render solar panels on roof with real flux data optimization
   useEffect(() => {
     if (!map || !buildingData) return;
 
@@ -120,7 +154,14 @@ const SolarMapWithPanels = ({
     const newPanelMarkers = panelsToShow.map((panel, index) => {
       // Get segment color for this panel
       const segment = buildingData.roofSegments.find(seg => seg.index === panel.segmentIndex);
-      const panelColor = segment?.color || '#2563EB';
+      let panelColor = segment?.color || '#2563EB';
+      
+      // Use real solar flux data for color if available
+      if (solarData) {
+        const fluxValue = panel.center ? 
+          getSolarFluxAtPoint(solarData, panel.center.latitude, panel.center.longitude) : 0;
+        panelColor = getFluxBasedColor(fluxValue);
+      }
 
       return new google.maps.Marker({
         position: {
@@ -129,13 +170,20 @@ const SolarMapWithPanels = ({
         },
         map: map,
         icon: {
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW, // Rectangle-like shape
-          scale: 4,
-          fillColor: panelColor,
-          fillOpacity: 0.8,
-          strokeColor: '#ffffff',
-          strokeWeight: 1,
-          rotation: panel.orientation === 'LANDSCAPE' ? 0 : 90
+          url: 'data:image/svg+xml;base64,' + btoa(`
+            <svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">
+              <!-- Solar panel background -->
+              <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" fill=\"${panelColor}\" 
+                    stroke=\"white\" stroke-width=\"2\" opacity=\"0.9\"/>
+              <!-- Solar panel grid -->
+              <path d=\"M8 3v18M12 3v18M16 3v18M3 8h18M3 12h18M3 16h18\" 
+                    stroke=\"white\" stroke-width=\"0.8\" opacity=\"0.7\"/>
+              <!-- Center highlight -->
+              <circle cx=\"12\" cy=\"12\" r=\"2\" fill=\"white\" opacity=\"0.8\"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(24, 24),
+          anchor: new google.maps.Point(12, 12)
         },
         title: `Panel ${index + 1}: ${Math.round(panel.yearlyEnergyDcKwh)} kWh/year`,
         zIndex: 1000
@@ -144,12 +192,12 @@ const SolarMapWithPanels = ({
 
     setPanelMarkers(newPanelMarkers);
 
-    // Update live calculations
+    // Update live calculations with solar flux data
     if (buildingData && onDataUpdate) {
-      const liveData = calculateLiveData(buildingData, panelCount);
+      const liveData = calculateLiveDataWithSolarFlux(buildingData, panelCount, solarData);
       onDataUpdate(liveData);
     }
-  }, [map, buildingData, panelCount, onDataUpdate]);
+  }, [map, buildingData, panelCount, solarData, onDataUpdate]);
 
   // Render roof segments as overlays
   useEffect(() => {
@@ -201,6 +249,16 @@ const SolarMapWithPanels = ({
         style={{ minHeight: '500px' }}
       />
       
+      {/* Solar Layer Manager - Only show when map is loaded and no error */}
+      {!isMapLoading && !mapError && map && (
+        <SolarLayerManager
+          map={map}
+          center={center}
+          onDataUpdate={handleSolarDataUpdate}
+          isLoading={isLoading}
+        />
+      )}
+      
       {/* Loading State */}
       {isMapLoading && (
         <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg">
@@ -226,33 +284,16 @@ const SolarMapWithPanels = ({
         </div>
       )}
       
-      {/* Map Controls */}
-      {!isMapLoading && !mapError && (
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3">
-          <div className="text-xs font-medium text-gray-700 mb-2">Map View</div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => map?.setMapTypeId('satellite')}
-              className="px-3 py-1 text-xs bg-primary text-white rounded hover:bg-primary-dark"
-            >
-              Satellite
-            </button>
-            <button
-              onClick={() => map?.setMapTypeId('hybrid')}
-              className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            >
-              Hybrid
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Panel Count Display */}
+      {/* Panel Count Display - moved to bottom left */}
       {buildingData && !isMapLoading && !mapError && (
-        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3">
+        <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-white/30">
           <div className="text-xs font-medium text-gray-700">Panels on Roof</div>
           <div className="text-xl font-bold text-primary">{panelCount}</div>
           <div className="text-xs text-gray-600">of {buildingData.maxPanels} max</div>
+          {solarData && (
+            <div className="text-xs text-green-600 mt-1">✓ Real solar data</div>
+          )}
         </div>
       )}
 
@@ -279,7 +320,106 @@ const SolarMapWithPanels = ({
   );
 };
 
-// Helper function to calculate live data
+// Helper function to get solar flux at a specific point
+function getSolarFluxAtPoint(
+  solarData: ProcessedSolarData,
+  latitude: number,
+  longitude: number
+): number {
+  // Convert lat/lng to pixel coordinates
+  const x = Math.floor(
+    ((longitude - solarData.bounds.west) / 
+     (solarData.bounds.east - solarData.bounds.west)) * solarData.width
+  );
+  
+  const y = Math.floor(
+    ((solarData.bounds.north - latitude) / 
+     (solarData.bounds.north - solarData.bounds.south)) * solarData.height
+  );
+
+  // Check bounds
+  if (x < 0 || x >= solarData.width || y < 0 || y >= solarData.height) {
+    return 0;
+  }
+
+  // Get flux value from array
+  const index = y * solarData.width + x;
+  return solarData.fluxData[index] || 0;
+}
+
+// Helper function to get color based on solar flux
+function getFluxBasedColor(fluxValue: number): string {
+  // Normalize flux value (typical range: 900-1400 kWh/m²/year)
+  const normalized = Math.min(Math.max((fluxValue - 900) / 500, 0), 1);
+  
+  if (normalized < 0.25) {
+    return '#3B82F6'; // Blue - lower flux
+  } else if (normalized < 0.5) {
+    return '#10B981'; // Green - medium flux
+  } else if (normalized < 0.75) {
+    return '#F59E0B'; // Yellow - good flux
+  } else {
+    return '#EF4444'; // Red - excellent flux
+  }
+}
+
+// Enhanced calculation with real solar flux data
+function calculateLiveDataWithSolarFlux(
+  buildingData: ProcessedBuildingData, 
+  panelCount: number,
+  solarData: ProcessedSolarData | null
+): LivePanelCalculation {
+  if (panelCount === 0) {
+    return {
+      panelCount: 0,
+      annualEnergyKwh: 0,
+      monthlySavingsEur: 0,
+      systemSizeKw: 0,
+      roofCoveragePercent: 0,
+      co2OffsetKgPerYear: 0
+    };
+  }
+
+  // Calculate based on optimal panel locations with real flux data
+  const panelsToUse = buildingData.optimalPanelLocations.slice(0, panelCount);
+  let annualEnergyKwh: number;
+  
+  if (solarData) {
+    // Use real solar flux data for accurate calculations
+    annualEnergyKwh = panelsToUse.reduce((sum, panel) => {
+      const fluxValue = getSolarFluxAtPoint(solarData, panel.center.latitude, panel.center.longitude);
+      // Convert flux (kWh/m²/year) to panel energy with efficiency factor
+      const panelArea = buildingData.panelDimensions.width * buildingData.panelDimensions.height; // m²
+      const efficiency = 0.20; // 20% panel efficiency
+      const systemEfficiency = 0.85; // System losses
+      return sum + (fluxValue * panelArea * efficiency * systemEfficiency);
+    }, 0);
+  } else {
+    // Fallback to building insights data
+    annualEnergyKwh = panelsToUse.reduce((sum, panel) => sum + panel.yearlyEnergyDcKwh, 0);
+  }
+  
+  const systemSizeKw = (panelCount * buildingData.panelDimensions.capacity) / 1000;
+  const panelArea = buildingData.panelDimensions.width * buildingData.panelDimensions.height;
+  const roofCoveragePercent = (panelArea * panelCount) / buildingData.totalRoofArea * 100;
+  
+  // Irish electricity rate ~€0.28/kWh (updated rate)
+  const monthlySavingsEur = (annualEnergyKwh / 12) * 0.28;
+  
+  // CO2 offset: 0.295 kg per kWh in Ireland
+  const co2OffsetKgPerYear = annualEnergyKwh * 0.295;
+
+  return {
+    panelCount,
+    annualEnergyKwh: Math.round(annualEnergyKwh),
+    monthlySavingsEur: Math.round(monthlySavingsEur),
+    systemSizeKw: Math.round(systemSizeKw * 10) / 10,
+    roofCoveragePercent: Math.round(roofCoveragePercent),
+    co2OffsetKgPerYear: Math.round(co2OffsetKgPerYear)
+  };
+}
+
+// Helper function to calculate live data (fallback)
 function calculateLiveData(buildingData: ProcessedBuildingData, panelCount: number): LivePanelCalculation {
   if (panelCount === 0) {
     return {
@@ -300,8 +440,8 @@ function calculateLiveData(buildingData: ProcessedBuildingData, panelCount: numb
   const panelArea = buildingData.panelDimensions.width * buildingData.panelDimensions.height;
   const roofCoveragePercent = (panelArea * panelCount) / buildingData.totalRoofArea * 100;
   
-  // Irish electricity rate ~€0.25/kWh
-  const monthlySavingsEur = (annualEnergyKwh / 12) * 0.25;
+  // Irish electricity rate ~€0.28/kWh (updated)
+  const monthlySavingsEur = (annualEnergyKwh / 12) * 0.28;
   
   // CO2 offset: 0.295 kg per kWh in Ireland
   const co2OffsetKgPerYear = annualEnergyKwh * 0.295;
