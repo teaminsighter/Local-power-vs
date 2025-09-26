@@ -54,7 +54,7 @@ const ProtectedRoute = ({
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-2xl shadow-xl p-8 text-center"
         >
-          <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: '#146443' }} />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Authenticating...</h3>
           <p className="text-gray-600">Please wait while we verify your access</p>
         </motion.div>
@@ -95,7 +95,10 @@ const ProtectedRoute = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push('/admin')}
-              className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              className="flex-1 px-4 py-2 text-white rounded-lg transition-colors"
+              style={{ backgroundColor: '#146443' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0f5233'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#146443'}
             >
               Dashboard
             </motion.button>
@@ -114,8 +117,8 @@ const ProtectedRoute = ({
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md mx-auto"
         >
-          <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-orange-600" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(20, 100, 67, 0.1)' }}>
+            <Lock className="w-8 h-8" style={{ color: '#146443' }} />
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">Authentication Required</h3>
           <p className="text-gray-600 mb-6">
@@ -125,7 +128,10 @@ const ProtectedRoute = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => router.push(fallbackPath)}
-            className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            className="w-full px-4 py-2 text-white rounded-lg transition-colors"
+            style={{ backgroundColor: '#146443' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0f5233'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#146443'}
           >
             Sign In
           </motion.button>

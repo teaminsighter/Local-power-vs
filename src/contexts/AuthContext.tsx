@@ -29,7 +29,8 @@ type AuthAction =
   | { type: 'AUTH_ERROR'; payload: string }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' }
-  | { type: 'UPDATE_USER'; payload: User };
+  | { type: 'UPDATE_USER'; payload: User }
+  | { type: 'INIT_COMPLETE' };
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
@@ -53,7 +54,7 @@ interface RegisterData {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true, // Start with loading true to prevent flicker
   error: null,
   token: null,
 };
@@ -88,6 +89,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
     case 'LOGOUT':
       return {
         ...initialState,
+        isLoading: false, // Set loading false when logging out
       };
     case 'CLEAR_ERROR':
       return {
@@ -98,6 +100,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return {
         ...state,
         user: action.payload,
+      };
+    case 'INIT_COMPLETE':
+      return {
+        ...state,
+        isLoading: false,
       };
     default:
       return state;
@@ -143,12 +150,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Check for existing session on mount
   useEffect(() => {
-    const checkExistingSession = () => {
-      const token = localStorage.getItem('auth_token');
-      const userData = localStorage.getItem('auth_user');
-      
-      if (token && userData) {
-        try {
+    const checkExistingSession = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const userData = localStorage.getItem('auth_user');
+        
+        if (token && userData) {
           const user = JSON.parse(userData);
           // Verify token is not expired (mock check)
           const tokenData = JSON.parse(atob(token.split('.')[1])); // Decode JWT-like token
@@ -158,15 +165,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Token expired
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_user');
+            dispatch({ type: 'INIT_COMPLETE' });
           }
-        } catch (error) {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
+        } else {
+          // No existing session
+          dispatch({ type: 'INIT_COMPLETE' });
         }
+      } catch (error) {
+        // Error during session check
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        dispatch({ type: 'INIT_COMPLETE' });
       }
     };
 
-    checkExistingSession();
+    // Add small delay to prevent flash
+    const timer = setTimeout(checkExistingSession, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Mock JWT token generation

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AdminSidebar from './AdminSidebar';
 import AdminTopBar from './AdminTopBar';
@@ -39,6 +39,23 @@ const AdminDashboard = () => {
   const [activeCategory, setActiveCategory] = useState('analytics');
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Add mounted state to prevent SSR mismatch
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: '#146443' }} />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
