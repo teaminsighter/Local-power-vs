@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 // import HowItWorksSection from '@/components/HowItWorksSection';
@@ -22,19 +23,21 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen">
-      <Navigation onGetQuoteClick={handleOpenCalculator} />
-      <HeroSection onGetQuoteClick={handleOpenCalculator} />
-      {/* <HowItWorksSection />
-      <WhyChooseSolarSection /> */}
-      <StateSelection />
-      <SolutionChooser />
-      <CTASection />
-      
-      <CalculatorModal 
-        isOpen={isCalculatorOpen} 
-        onClose={handleCloseCalculator} 
-      />
-    </main>
+    <ErrorBoundary>
+      <main className="min-h-screen">
+        <Navigation onGetQuoteClick={handleOpenCalculator} />
+        <HeroSection onGetQuoteClick={handleOpenCalculator} />
+        {/* <HowItWorksSection />
+        <WhyChooseSolarSection /> */}
+        <StateSelection />
+        <SolutionChooser />
+        <CTASection />
+        
+        <CalculatorModal 
+          isOpen={isCalculatorOpen} 
+          onClose={handleCloseCalculator} 
+        />
+      </main>
+    </ErrorBoundary>
   );
 }

@@ -44,6 +44,15 @@ body {
   .backdrop-blur-sm {
     backdrop-filter: blur(8px);
   }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {

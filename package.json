@@ -6,15 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
     "@types/google.maps": "^3.58.1",
     "framer-motion": "^12.23.22",
     "geotiff": "^2.1.4-beta.0",
     "geotiff-geokeys-to-proj4": "^2024.4.13",
     "lucide-react": "^0.544.0",
     "next": "14.2.32",
+    "prisma": "^6.16.2",
     "proj4": "^2.19.10",
     "react": "^18",
     "react-dom": "^18",

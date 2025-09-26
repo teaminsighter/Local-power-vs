@@ -11,6 +11,9 @@ import StatisticsDataGrid from '@/solar-api/components/StatisticsDataGrid';
 import RealSatelliteMap from './RealSatelliteMap';
 import { loadGoogleMapsAPI, isGoogleMapsLoaded } from '@/solar-api/utils/google-maps-loader';
 import { ProcessedBuildingData, LivePanelCalculation } from '@/solar-api/types/building-insights';
+import LeadCaptureForm from './calculator/LeadCaptureForm';
+import leadsService from '@/services/leadsService';
+import { trackConversionEvent } from '@/utils/adminSettings';
 
 interface CalculatorModalProps {
   isOpen: boolean;
@@ -36,6 +39,46 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
 
   // Building insights service
   const buildingInsightsService = new BuildingInsightsService();
+
+  // Lead capture handler
+  const handleLeadSubmission = async (leadData: any) => {
+    try {
+      // Calculate system details for the lead
+      const systemDetails = {
+        systemSize: panelCount * 0.4, // Assume 400W panels
+        estimatedCost: 15000 + (panelCount * 400), // Basic cost calculation
+        annualSavings: 2400 + (panelCount * 120), // Basic savings calculation
+        paybackPeriod: 8.5,
+        address: selectedAddress || buildingData?.address || 'Location from calculator',
+        panelCount: panelCount
+      };
+
+      const leadWithSystemDetails = {
+        ...leadData,
+        systemDetails
+      };
+
+      // Save lead to service
+      const newLead = await leadsService.createLead(leadWithSystemDetails);
+      
+      // Track conversion event
+      await trackConversionEvent('generate_lead', {
+        systemCost: systemDetails.estimatedCost,
+        systemSize: systemDetails.systemSize,
+        leadId: newLead.id
+      });
+
+      console.log('Lead captured successfully:', newLead);
+    } catch (error) {
+      console.error('Failed to capture lead:', error);
+      throw error;
+    }
+  };
+
+  // Skip lead capture and close modal
+  const handleSkipLead = () => {
+    onClose();
+  };
 
   // Handle location changes from pin movement
   const handleLocationChange = async (lat: number, lng: number) => {
@@ -131,6 +174,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
     { number: 4, title: 'Solution', description: 'Choose your system' },
     { number: 5, title: 'Details', description: 'Additional information' },
     { number: 6, title: 'Quote', description: 'Your personalized quote' },
+    { number: 7, title: 'Contact', description: 'Get your free consultation' },
   ];
 
   // Close modal on Escape key
@@ -690,21 +734,74 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             className="max-w-full mx-auto h-full"
           >
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
-              {/* Left Column - Interactive Solar Map (40% reduction) */}
-              <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg overflow-hidden" style={{ height: 'fit-content' }}>
-                <div className="p-3 border-b border-gray-200">
-                  <h3 className="text-base font-bold text-gray-800">Interactive Solar Map</h3>
-                  <p className="text-xs text-gray-600">Drag the pin to analyze roof areas</p>
+              {/* Left Column - Interactive Solar Map */}
+              <div className="lg:col-span-2 space-y-3">
+                {/* Map Container */}
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                  <div className="p-3 border-b border-gray-200">
+                    <h3 className="text-base font-bold text-gray-800">Interactive Solar Map</h3>
+                    <p className="text-xs text-gray-600">Drag the pin to analyze roof areas</p>
+                  </div>
+                  <div style={{ height: '500px' }}>
+                    <SolarMapWithPanels
+                      center={currentLocation}
+                      onLocationChange={handleLocationChange}
+                      buildingData={buildingData || undefined}
+                      panelCount={panelCount}
+                      onDataUpdate={() => {}} // No longer needed
+                      isLoading={isLoadingBuildingData}
+                    />
+                  </div>
                 </div>
-                <div style={{ height: '500px' }}>
-                  <SolarMapWithPanels
-                    center={currentLocation}
-                    onLocationChange={handleLocationChange}
-                    buildingData={buildingData || undefined}
-                    panelCount={panelCount}
-                    onDataUpdate={() => {}} // No longer needed
-                    isLoading={isLoadingBuildingData}
-                  />
+
+                {/* Panel Color Information */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+                  <h4 className="text-sm font-bold text-gray-800 mb-3">Panel Color Guide</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Left Column */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg bg-red-500 border-2 border-white shadow-sm flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full opacity-80"></div>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Excellent Solar Potential</span>
+                          <p className="text-xs text-gray-500">1200+ kWh/m²/year</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg bg-yellow-500 border-2 border-white shadow-sm flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full opacity-80"></div>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Good Solar Potential</span>
+                          <p className="text-xs text-gray-500">1000-1200 kWh/m²/year</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Right Column */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg bg-green-500 border-2 border-white shadow-sm flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full opacity-80"></div>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Moderate Solar Potential</span>
+                          <p className="text-xs text-gray-500">800-1000 kWh/m²/year</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg bg-blue-500 border-2 border-white shadow-sm flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full opacity-80"></div>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Lower Solar Potential</span>
+                          <p className="text-xs text-gray-500">&lt;800 kWh/m²/year</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1421,6 +1518,33 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
           </motion.div>
         );
 
+      case 7:
+        // Calculate system details for lead capture
+        const systemDetails = {
+          systemSize: panelCount * 0.4, // Assume 400W panels
+          estimatedCost: 15000 + (panelCount * 400), // Basic cost calculation
+          annualSavings: 2400 + (panelCount * 120), // Basic savings calculation
+          paybackPeriod: 8.5,
+          address: selectedAddress || 'Location from calculator',
+          panelCount: panelCount
+        };
+
+        return (
+          <motion.div
+            key="step7"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="max-w-4xl mx-auto pt-6 pb-8 relative"
+          >
+            <LeadCaptureForm
+              systemDetails={systemDetails}
+              onSubmit={handleLeadSubmission}
+              onSkip={handleSkipLead}
+            />
+          </motion.div>
+        );
+
       default:
         return null;
     }
@@ -1504,7 +1628,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                 <span>Previous</span>
               </motion.button>
 
-              {currentStep !== 1 && currentStep !== 5 && (
+              {currentStep !== 1 && currentStep !== 5 && currentStep !== 7 && (
                 <motion.button
                   onClick={nextStep}
                   disabled={currentStep === steps.length}
@@ -1515,7 +1639,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                   }`}
                   whileHover={currentStep < steps.length ? { scale: 1.05 } : {}}
                 >
-                  <span>Next</span>
+                  <span>{currentStep === 6 ? 'Get Free Quote' : 'Next'}</span>
                   <ChevronRight size={20} />
                 </motion.button>
               )}

@@ -79,31 +79,7 @@ const SolarMapWithPanels = ({
       position: { lat: center.lat, lng: center.lng },
       map: map,
       draggable: true,
-      title: 'Drag to analyze different roof locations',
-      icon: {
-        url: 'data:image/svg+xml;base64,' + btoa(`
-          <svg width=\"40\" height=\"52\" viewBox=\"0 0 40 52\" xmlns=\"http://www.w3.org/2000/svg\">
-            <defs>
-              <linearGradient id=\"pinGrad\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">
-                <stop offset=\"0%\" style=\"stop-color:#FF6B6B;stop-opacity:1\" />
-                <stop offset=\"100%\" style=\"stop-color:#E53E3E;stop-opacity:1\" />
-              </linearGradient>
-              <filter id=\"shadow\" x=\"-50%\" y=\"-50%\" width=\"200%\" height=\"200%\">
-                <dropShadow dx=\"2\" dy=\"4\" stdDeviation=\"3\" flood-color=\"rgba(0,0,0,0.3)\"/>
-              </filter>
-            </defs>
-            <!-- Pin body -->
-            <path d=\"M20 4C12.268 4 6 10.268 6 18c0 11.25 14 26 14 26s14-14.75 14-26C34 10.268 27.732 4 20 4z\" 
-                  fill=\"url(#pinGrad)\" stroke=\"white\" stroke-width=\"2\" filter=\"url(#shadow)\"/>
-            <!-- Inner circle -->
-            <circle cx=\"20\" cy=\"18\" r=\"6\" fill=\"white\" stroke=\"#E53E3E\" stroke-width=\"1.5\"/>
-            <!-- Center dot -->
-            <circle cx=\"20\" cy=\"18\" r=\"2.5\" fill=\"#E53E3E\"/>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(40, 52),
-        anchor: new google.maps.Point(20, 52)
-      }
+      title: 'Drag to analyze different roof locations'
     });
 
     newMarker.addListener('dragend', (e: google.maps.MapMouseEvent) => {

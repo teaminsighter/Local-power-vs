@@ -49,21 +49,27 @@ const PanelSlider = ({
 
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-base font-bold text-gray-800">Panel Count</h3>
-          <p className="text-xs text-gray-600">Adjust to see live calculations</p>
+          <p className="text-xs text-gray-600">Use buttons or drag slider to adjust</p>
         </div>
         <div className="text-right">
-          <div className="text-xl font-bold text-primary">{panelCount}</div>
+          <motion.div 
+            className="text-2xl font-bold text-green-600"
+            animate={{ scale: isDragging ? 1.1 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            {panelCount}
+          </motion.div>
           <div className="text-xs text-gray-500">of {maxPanels}</div>
         </div>
       </div>
 
       {/* Control Buttons */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-6">
         {/* Fast Decrement */}
         <motion.button
           onClick={handleFastDecrement}
@@ -73,7 +79,7 @@ const PanelSlider = ({
           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
             disabled || panelCount <= 0
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 text-primary hover:bg-gray-300 shadow-sm hover:shadow-md'
+              : 'bg-gray-200 text-green-600 hover:bg-gray-300 shadow-sm hover:shadow-md'
           }`}
         >
           <SkipBack size={14} />
@@ -87,25 +93,50 @@ const PanelSlider = ({
           className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
             disabled || panelCount <= 0
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-primary text-white hover:bg-primary-dark shadow-md hover:shadow-lg'
+              : 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
           }`}
         >
           <Minus size={18} />
         </motion.button>
 
-        {/* Slider Container */}
-        <div className="flex-1 relative">
+        {/* Enhanced Slider Container */}
+        <div className="flex-1 relative px-2">
           {/* Slider Track */}
-          <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
             {/* Progress Fill */}
             <motion.div
-              className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-primary-light rounded-full"
+              className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full shadow-sm"
               initial={{ width: '0%' }}
               animate={{ width: `${maxPanels > 0 ? (panelCount / maxPanels) * 100 : 0}%` }}
-              transition={{ duration: 0.1, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
             />
             
-            {/* Slider Input */}
+            {/* Enhanced Slider Thumb */}
+            <motion.div
+              className={`absolute top-1/2 transform -translate-y-1/2 w-7 h-7 rounded-full shadow-lg z-20 cursor-grab active:cursor-grabbing ${
+                disabled 
+                  ? 'bg-gray-400 border-2 border-gray-300' 
+                  : 'bg-white border-2 border-green-500 hover:border-green-600'
+              }`}
+              style={{
+                left: `calc(${maxPanels > 0 ? (panelCount / maxPanels) * 100 : 0}% - 14px)`
+              }}
+              animate={{ 
+                scale: isDragging ? 1.3 : 1,
+                boxShadow: isDragging 
+                  ? '0 8px 25px rgba(34, 197, 94, 0.4)' 
+                  : '0 4px 15px rgba(0, 0, 0, 0.2)'
+              }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              whileHover={{ scale: 1.1 }}
+            >
+              {/* Thumb Inner Dot */}
+              <div className={`absolute inset-0 rounded-full ${
+                disabled ? 'bg-gray-300' : 'bg-green-500'
+              } transform scale-50`} />
+            </motion.div>
+            
+            {/* Invisible Native Slider Input */}
             <input
               type="range"
               min="0"
@@ -114,27 +145,43 @@ const PanelSlider = ({
               onChange={handleSliderChange}
               onMouseDown={() => setIsDragging(true)}
               onMouseUp={() => setIsDragging(false)}
+              onTouchStart={() => setIsDragging(true)}
+              onTouchEnd={() => setIsDragging(false)}
               disabled={disabled}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-            />
-            
-            {/* Slider Thumb */}
-            <motion.div
-              className={`absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg transition-colors ${
-                disabled ? 'bg-gray-400' : 'bg-white border-2 border-primary'
-              }`}
-              animate={{ 
-                left: `calc(${maxPanels > 0 ? (panelCount / maxPanels) * 100 : 0}% - 12px)`,
-                scale: isDragging ? 1.2 : 1 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-30"
+              style={{
+                WebkitAppearance: 'none',
+                appearance: 'none',
+                background: 'transparent'
               }}
-              transition={{ duration: 0.1, ease: "easeOut" }}
             />
           </div>
 
-          {/* Range Labels */}
-          <div className="flex justify-between mt-2">
-            <span className="text-xs text-gray-500">0</span>
-            <span className="text-xs text-gray-500">{maxPanels}</span>
+          {/* Enhanced Range Labels */}
+          <div className="flex justify-between mt-3">
+            <span className="text-xs font-medium text-gray-600">0</span>
+            <span className="text-xs font-medium text-gray-600">{maxPanels}</span>
+          </div>
+          
+          {/* Progress Indicators */}
+          <div className="flex justify-center mt-2">
+            <div className="flex space-x-1">
+              {[...Array(5)].map((_, i) => {
+                const threshold = (i + 1) * (maxPanels / 5);
+                return (
+                  <motion.div
+                    key={i}
+                    className={`w-2 h-1 rounded-full transition-colors ${
+                      panelCount >= threshold ? 'bg-green-500' : 'bg-gray-200'
+                    }`}
+                    animate={{
+                      scale: panelCount >= threshold ? 1.2 : 1
+                    }}
+                    transition={{ duration: 0.2 }}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -146,7 +193,7 @@ const PanelSlider = ({
           className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
             disabled || panelCount >= maxPanels
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-primary text-white hover:bg-primary-dark shadow-md hover:shadow-lg'
+              : 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg'
           }`}
         >
           <Plus size={18} />
@@ -161,7 +208,7 @@ const PanelSlider = ({
           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
             disabled || panelCount >= maxPanels
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 text-primary hover:bg-gray-300 shadow-sm hover:shadow-md'
+              : 'bg-gray-200 text-green-600 hover:bg-gray-300 shadow-sm hover:shadow-md'
           }`}
         >
           <SkipForward size={14} />
@@ -176,9 +223,9 @@ const PanelSlider = ({
           <div className="text-xs text-gray-500">kWh/yr</div>
         </div>
         <div className="bg-green-50 rounded-lg p-2 text-center">
-          <div className="text-xs text-green-600 font-medium mb-1">Savings</div>
-          <div className="text-sm font-bold text-gray-800">€{Math.round(panelCount * 400 * 0.25 / 12)}</div>
-          <div className="text-xs text-gray-500">/month</div>
+          <div className="text-xs text-green-600 font-medium mb-1">Coverage</div>
+          <div className="text-sm font-bold text-gray-800">{Math.round((panelCount * 400 / 4500) * 100)}</div>
+          <div className="text-xs text-gray-500">% home</div>
         </div>
         <div className="bg-blue-50 rounded-lg p-2 text-center">
           <div className="text-xs text-blue-600 font-medium mb-1">System</div>

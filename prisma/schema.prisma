@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      Role     @default(VIEWER)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Lead {
+  id                String            @id @default(cuid())
+  firstName         String            @map("first_name")
+  lastName          String            @map("last_name")
+  email             String
+  phone             String?
+  contactPreference ContactPreference @default(EMAIL) @map("contact_preference")
+  bestTimeToCall    String?           @map("best_time_to_call")
+  status            LeadStatus        @default(NEW)
+  source            String            @default("website")
+  score             Int               @default(0)
+  tags              String?
+  notes             String?
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  systemDetails SystemDetails?
+
+  @@map("leads")
+}
+
+model SystemDetails {
+  id            String  @id @default(cuid())
+  leadId        String  @unique @map("lead_id")
+  systemSize    Float   @map("system_size")
+  estimatedCost Float   @map("estimated_cost")
+  annualSavings Float   @map("annual_savings")
+  paybackPeriod Float   @map("payback_period")
+  panelCount    Int     @map("panel_count")
+  roofArea      Float   @map("roof_area")
+  monthlyBill   Float   @map("monthly_bill")
+  usageKwh      Float   @map("usage_kwh")
+  address       String
+  propertyType  String  @map("property_type")
+  roofType      String  @map("roof_type")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("system_details")
+}
+
+model PricingTier {
+  id            String   @id @default(cuid())
+  name          String
+  pricePerWatt  Float    @map("price_per_watt")
+  minSystemSize Float    @map("min_system_size")
+  maxSystemSize Float?   @map("max_system_size")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("pricing_tiers")
+}
+
+model LandingPage {
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  template       String
+  status         PageStatus      @default(DRAFT)
+  content        Json
+  seoTitle       String?         @map("seo_title")
+  seoDescription String?         @map("seo_description")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  abTestVariants ABTestVariant[]
+
+  @@map("landing_pages")
+}
+
+model ABTest {
+  id                      String   @id @default(cuid())
+  name                    String
+  description             String?
+  status                  TestStatus @default(DRAFT)
+  startDate               DateTime? @map("start_date")
+  endDate                 DateTime? @map("end_date")
+  confidenceLevel         Float    @default(95) @map("confidence_level")
+  minimumSampleSize       Int      @default(100) @map("minimum_sample_size")
+  statisticalSignificance Float    @default(0) @map("statistical_significance")
+  winnerVariant           String?  @map("winner_variant")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  variants ABTestVariant[]
+
+  @@map("ab_tests")
+}
+
+model ABTestVariant {
+  id             String   @id @default(cuid())
+  testId         String   @map("test_id")
+  name           String
+  pageId         String   @map("page_id")
+  trafficSplit   Float    @map("traffic_split")
+  views          Int      @default(0)
+  conversions    Int      @default(0)
+  conversionRate Float    @default(0) @map("conversion_rate")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  test ABTest      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  page LandingPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@map("ab_test_variants")
+}
+
+enum Role {
+  SUPER_ADMIN @map("super_admin")
+  ADMIN       @map("admin")
+  VIEWER      @map("viewer")
+}
+
+enum ContactPreference {
+  PHONE @map("phone")
+  EMAIL @map("email")
+  BOTH  @map("both")
+}
+
+enum LeadStatus {
+  NEW            @map("new")
+  CONTACTED      @map("contacted")
+  QUALIFIED      @map("qualified")
+  PROPOSAL_SENT  @map("proposal_sent")
+  CONVERTED      @map("converted")
+  NOT_INTERESTED @map("not_interested")
+}
+
+enum PageStatus {
+  DRAFT     @map("draft")
+  PUBLISHED @map("published")
+  ARCHIVED  @map("archived")
+}
+
+enum TestStatus {
+  DRAFT     @map("draft")
+  RUNNING   @map("running")
+  PAUSED    @map("paused")
+  COMPLETED @map("completed")
+}
