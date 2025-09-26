@@ -16,6 +16,7 @@ import ABTesting from './pagebuilder/ABTesting';
 import GoogleAds from './integrations/GoogleAds';
 import FacebookAds from './integrations/FacebookAds';
 import GA4Integration from './integrations/GA4Integration';
+import WebhookConfiguration from './integrations/WebhookConfiguration';
 import APIConfiguration from './settings/APIConfiguration';
 import SolarPricing from './settings/SolarPricing';
 import UserProfile from './UserProfile';
@@ -172,7 +173,7 @@ export const adminCategories: AdminCategory[] = [
       { id: 'google-ads', name: 'Google Ads', component: GoogleAds },
       { id: 'facebook-ads', name: 'Facebook Ads', component: FacebookAds },
       { id: 'ga4', name: 'GA4', component: GA4Integration },
-      { id: 'webhooks', name: 'Webhooks/APIs', component: () => <div>Webhooks/APIs Content</div> }
+      { id: 'webhooks', name: 'Webhooks/APIs', component: WebhookConfiguration }
     ]
   },
   {

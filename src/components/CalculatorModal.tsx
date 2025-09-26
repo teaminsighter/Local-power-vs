@@ -13,6 +13,7 @@ import { loadGoogleMapsAPI, isGoogleMapsLoaded } from '@/solar-api/utils/google-
 import { ProcessedBuildingData, LivePanelCalculation } from '@/solar-api/types/building-insights';
 import LeadCaptureForm from './calculator/LeadCaptureForm';
 import leadsService from '@/services/leadsService';
+import { webhookService } from '@/services/webhookService';
 import { trackConversionEvent } from '@/utils/adminSettings';
 
 interface CalculatorModalProps {
@@ -60,6 +61,16 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
 
       // Save lead to service
       const newLead = await leadsService.createLead(leadWithSystemDetails);
+      
+      // Send to webhooks
+      try {
+        const webhookPayload = webhookService.createPayloadFromLead(newLead);
+        await webhookService.sendToAllWebhooks(webhookPayload);
+        console.log('Lead sent to webhooks successfully');
+      } catch (webhookError) {
+        console.error('Failed to send lead to webhooks:', webhookError);
+        // Don't fail the lead capture if webhooks fail
+      }
       
       // Track conversion event
       await trackConversionEvent('generate_lead', {
