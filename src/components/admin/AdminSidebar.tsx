@@ -18,12 +18,13 @@ const AdminSidebar = ({
 }: AdminSidebarProps) => {
   return (
     <motion.div
-      className="bg-gray-900 text-white flex flex-col shadow-xl"
+      className="text-white flex flex-col shadow-xl"
+      style={{ backgroundColor: '#146443' }}
       animate={{ width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b border-green-700">
         <div className="flex items-center justify-between">
           {!collapsed && (
             <motion.div
@@ -32,7 +33,7 @@ const AdminSidebar = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <h1 className="text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-white">
                 Insighter.Digital
               </h1>
               <p className="text-xs text-gray-400 mt-1">Analytics Admin Panel</p>
@@ -43,7 +44,7 @@ const AdminSidebar = ({
             onClick={onToggleCollapse}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-lg hover:bg-green-600 transition-colors"
           >
             <svg 
               className="w-5 h-5" 
@@ -71,9 +72,23 @@ const AdminSidebar = ({
               onClick={() => onCategoryChange(category.id)}
               className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 ${
                 activeCategory === category.id
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  ? 'text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white'
               }`}
+              style={activeCategory === category.id ? 
+                { backgroundColor: 'rgba(255, 255, 255, 0.2)' } : 
+                {}
+              }
+              onMouseEnter={(e) => {
+                if (activeCategory !== category.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeCategory !== category.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, x: -20 }}

@@ -70,16 +70,16 @@ const LoginForm = ({ onToggleMode, onSuccess }: LoginFormProps) => {
         className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-6">
+        <div className="px-8 py-6" style={{ backgroundColor: '#146443' }}>
           <h2 className="text-2xl font-bold text-white text-center">Admin Login</h2>
-          <p className="text-orange-100 text-center mt-1">Access your dashboard</p>
+          <p className="text-green-100 text-center mt-1">Access your dashboard</p>
         </div>
 
         <div className="px-8 py-8">
           {/* Demo Credentials */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h4 className="font-medium text-blue-900 mb-2">Demo Credentials:</h4>
-            <div className="text-sm text-blue-800 space-y-1">
+          <div className="rounded-lg p-4 mb-6" style={{ backgroundColor: 'rgba(20, 100, 67, 0.1)', border: '1px solid #146443' }}>
+            <h4 className="font-medium mb-2" style={{ color: '#146443' }}>Demo Credentials:</h4>
+            <div className="text-sm space-y-1" style={{ color: '#146443' }}>
               <div><strong>Super Admin:</strong> admin@localpower.com / admin123</div>
               <div><strong>Admin:</strong> manager@localpower.com / manager123</div>
             </div>
@@ -188,8 +188,19 @@ const LoginForm = ({ onToggleMode, onSuccess }: LoginFormProps) => {
               className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-all ${
                 isLoading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-md hover:shadow-lg'
+                  : 'shadow-md hover:shadow-lg'
               }`}
+              style={!isLoading ? { backgroundColor: '#146443' } : {}}
+              onMouseEnter={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#0f5233';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#146443';
+                }
+              }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">

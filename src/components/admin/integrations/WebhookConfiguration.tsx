@@ -205,11 +205,20 @@ const WebhookConfiguration = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Active</label>
                 <button
                   onClick={() => toggleWebhook(webhook.id)}
-                  className={`inline-flex items-center justify-center w-12 h-6 rounded-full transition-colors ${
-                    webhook.active 
-                      ? 'bg-orange-500 hover:bg-orange-600' 
-                      : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
+                  className="inline-flex items-center justify-center w-12 h-6 rounded-full transition-colors"
+                  style={{
+                    backgroundColor: webhook.active ? '#146443' : '#d1d5db'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (webhook.active) {
+                      e.currentTarget.style.backgroundColor = '#0f5233';
+                    } else {
+                      e.currentTarget.style.backgroundColor = '#9ca3af';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = webhook.active ? '#146443' : '#d1d5db';
+                  }}
                 >
                   <div
                     className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
@@ -306,11 +315,20 @@ const WebhookConfiguration = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Active</label>
             <button
               onClick={() => setNewWebhook(prev => ({ ...prev, active: !prev.active }))}
-              className={`inline-flex items-center justify-center w-12 h-6 rounded-full transition-colors ${
-                newWebhook.active 
-                  ? 'bg-orange-500 hover:bg-orange-600' 
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
+              className="inline-flex items-center justify-center w-12 h-6 rounded-full transition-colors"
+              style={{
+                backgroundColor: newWebhook.active ? '#146443' : '#d1d5db'
+              }}
+              onMouseEnter={(e) => {
+                if (newWebhook.active) {
+                  e.currentTarget.style.backgroundColor = '#0f5233';
+                } else {
+                  e.currentTarget.style.backgroundColor = '#9ca3af';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = newWebhook.active ? '#146443' : '#d1d5db';
+              }}
             >
               <div
                 className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
@@ -327,7 +345,10 @@ const WebhookConfiguration = () => {
           <div className="md:col-span-1">
             <button
               onClick={addWebhook}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+              className="w-full text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+              style={{ backgroundColor: '#146443' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0f5233'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#146443'}
             >
               <Plus size={18} />
             </button>
@@ -342,7 +363,14 @@ const WebhookConfiguration = () => {
           whileTap={{ scale: 0.98 }}
           onClick={saveAllWebhooks}
           disabled={isLoading}
-          className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center"
+          className="disabled:bg-gray-300 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center"
+          style={!isLoading ? { backgroundColor: '#146443' } : {}}
+          onMouseEnter={(e) => {
+            if (!isLoading) e.currentTarget.style.backgroundColor = '#0f5233';
+          }}
+          onMouseLeave={(e) => {
+            if (!isLoading) e.currentTarget.style.backgroundColor = '#146443';
+          }}
         >
           {isLoading ? (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />

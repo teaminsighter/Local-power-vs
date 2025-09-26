@@ -20,7 +20,7 @@ const AdminTopBar = ({ activeCategory, activeTab, onTabChange }: AdminTopBarProp
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: '#146443' }}>
               {currentCategory.icon}
             </div>
             <div>
@@ -76,9 +76,10 @@ const AdminTopBar = ({ activeCategory, activeTab, onTabChange }: AdminTopBarProp
               onClick={() => onTabChange(tab.id)}
               className={`relative px-6 py-3 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'text-green-600 border-b-2 border-green-600'
+                  ? 'border-b-2'
                   : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300'
               }`}
+              style={activeTab === tab.id ? { color: '#146443', borderColor: '#146443' } : {}}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 10 }}
