@@ -1,14 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+// Only create Supabase client if environment variables are properly set
+const isSupabaseConfigured = 
+  process.env.NEXT_PUBLIC_SUPABASE_URL && 
+  process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-project.supabase.co' &&
+  process.env.SUPABASE_SERVICE_ROLE_KEY && 
+  process.env.SUPABASE_SERVICE_ROLE_KEY !== 'your_supabase_service_role_key';
+
+export const supabase = isSupabaseConfigured ? createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
   }
-});
+}) : null;
 
 export interface DatabaseUser {
   id: string;
@@ -116,7 +123,12 @@ export class DatabaseError extends Error {
 
 export async function testDatabaseConnection(): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    if (!supabase) {
+      console.warn('Supabase not configured - database connection test skipped');
+      return false;
+    }
+    
+    const { error } = await supabase
       .from('users')
       .select('id')
       .limit(1);
@@ -135,6 +147,11 @@ export async function testDatabaseConnection(): Promise<boolean> {
 
 export async function runMigrations(): Promise<void> {
   try {
+    if (!supabase) {
+      console.warn('Supabase not configured - migrations skipped');
+      return;
+    }
+    
     const { error } = await supabase.rpc('check_and_create_tables');
     if (error) {
       throw new DatabaseError(`Migration failed: ${error.message}`, error.code);

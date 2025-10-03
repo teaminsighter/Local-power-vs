@@ -73,7 +73,7 @@ const AdminAuthPageContent = () => {
                 {[
                   { icon: '📊', text: 'Comprehensive Analytics Dashboard' },
                   { icon: '🔧', text: 'Complete API & Pricing Management' },
-                  { icon: '🎯', text: 'Advanced Lead Management System' },
+                  { icon: '🎯', text: 'Advanced CRM System' },
                   { icon: '🚀', text: 'A/B Testing & Optimization Tools' }
                 ].map((feature, index) => (
                   <motion.div

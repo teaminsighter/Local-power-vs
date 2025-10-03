@@ -2,25 +2,48 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AdminContextProvider, useAdminContext } from '@/contexts/AdminContext';
+import { useAuth } from '@/contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminTopBar from './AdminTopBar';
 import AdminContent from './AdminContent';
 import AnalyticsOverview from './analytics/AnalyticsOverview';
+import StepAnalyticsDashboard from './analytics/StepAnalyticsDashboard';
+import LeadAnalytics from './analytics/LeadAnalytics';
+import MarketingAnalytics from './analytics/MarketingAnalytics';
+import RealTimeTracking from './analytics/RealTimeTracking';
+import VisitorTrackingDashboard from './analytics/VisitorTrackingDashboard';
+import VisitorAnalysis from './crm/VisitorAnalysis';
 import AllLeads from './leads/AllLeads';
+import DuplicateAnalysis from './leads/DuplicateAnalysis';
+import ExportReports from './leads/ExportReports';
 import ChatbotQuery from './ai/ChatbotQuery';
+import AutoReports from './ai/AutoReports';
+import Recommendations from './ai/Recommendations';
+import PerformanceAlerts from './ai/PerformanceAlerts';
 import DataLayerEvents from './tracking/DataLayerEvents';
+import GTMConfig from './tracking/GTMConfig';
+import PlatformIntegrations from './tracking/PlatformIntegrations';
+import ConversionAPI from './tracking/ConversionAPI';
 import LandingPages from './pagebuilder/LandingPages';
 import FormsBuilder from './pagebuilder/FormsBuilder';
 import Templates from './pagebuilder/Templates';
-import ABTesting from './pagebuilder/ABTesting';
+import ABTesting from './ABTesting';
 import GoogleAds from './integrations/GoogleAds';
 import FacebookAds from './integrations/FacebookAds';
 import GA4Integration from './integrations/GA4Integration';
 import WebhookConfiguration from './integrations/WebhookConfiguration';
 import APIConfiguration from './settings/APIConfiguration';
 import SolarPricing from './settings/SolarPricing';
+import GeneralSettings from './settings/GeneralSettings';
+import DatabaseSettings from './settings/DatabaseSettings';
+import BackupSettings from './settings/BackupSettings';
 import UserProfile from './UserProfile';
 import LeadsManagement from './leads/LeadsManagement';
+import ManageUsers from './users/ManageUsers';
+import Permissions from './users/Permissions';
+import ActivityLogs from './users/ActivityLogs';
+import AIAssistant from './ai/AIAssistant';
 
 export interface AdminCategory {
   id: string;
@@ -35,16 +58,103 @@ export interface AdminTab {
   component: React.ComponentType<any>;
 }
 
-const AdminDashboard = () => {
+const AdminDashboardContent = () => {
   const [activeCategory, setActiveCategory] = useState('analytics');
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [filteredCategories, setFilteredCategories] = useState(adminCategories);
+  const { updateContext } = useAdminContext();
+  const { user } = useAuth();
 
-  // Add mounted state to prevent SSR mismatch
+  // Filter categories based on user permissions
   useEffect(() => {
-    setIsLoading(false);
-  }, []);
+    const filterCategoriesByPermissions = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/admin/categories?userId=${user.id}`);
+        const data = await response.json();
+        
+        if (data.success && Array.isArray(data.categories)) {
+          setFilteredCategories(data.categories);
+          
+          // Set first available category as active if current category is not accessible
+          if (data.categories.length > 0) {
+            const hasAccess = data.categories.some((cat: AdminCategory) => cat.id === activeCategory);
+            if (!hasAccess) {
+              setActiveCategory(data.categories[0].id);
+              if (data.categories[0].tabs.length > 0) {
+                setActiveTab(data.categories[0].tabs[0].id);
+              }
+            }
+          }
+        } else {
+          // Fallback to all categories if API fails
+          setFilteredCategories(adminCategories);
+        }
+      } catch (error) {
+        console.error('Error filtering categories:', error);
+        // Fallback to all categories if filtering fails
+        setFilteredCategories(adminCategories);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    filterCategoriesByPermissions();
+  }, [user?.id]);
+
+  // Update context when category or tab changes
+  useEffect(() => {
+    const category = filteredCategories.find(c => c.id === activeCategory);
+    const tab = category?.tabs.find(t => t.id === activeTab);
+    
+    updateContext({
+      currentCategory: activeCategory,
+      currentTab: activeTab,
+      breadcrumb: ['Admin', category?.name || 'Unknown', tab?.name || 'Unknown'],
+      availableActions: getAvailableActions(activeCategory, activeTab)
+    });
+  }, [activeCategory, activeTab, filteredCategories, updateContext]);
+
+  const getAvailableActions = (category: string, tab: string): string[] => {
+    const actionMap: Record<string, Record<string, string[]>> = {
+      'analytics': {
+        'overview': ['Refresh Data', 'Export Report', 'Change Date Range', 'View Details'],
+        'steps': ['Analyze Funnel', 'Export Funnel Data', 'A/B Test Setup'],
+        'leads': ['Filter Leads', 'Generate Report', 'Quality Analysis'],
+        'marketing': ['Campaign Analysis', 'ROI Report', 'Budget Optimization'],
+        'realtime': ['Monitor Live', 'Set Alerts', 'View Sessions'],
+        'visitors': ['Behavior Analysis', 'Segment Visitors', 'Heatmap View']
+      },
+      'lead-management': {
+        'all-leads': ['Add Lead', 'Update Status', 'Contact Lead', 'Export Leads'],
+        'lead-analysis': ['Quality Score', 'Trend Analysis', 'Conversion Report'],
+        'duplicates': ['Find Duplicates', 'Merge Leads', 'Clean Database'],
+        'reports': ['Generate Report', 'Schedule Export', 'Custom Query']
+      }
+    };
+
+    return actionMap[category]?.[tab] || ['View', 'Export', 'Refresh'];
+  };
+
+  // Navigation handler for AI assistant
+  const handleAINavigation = (categoryId: string, tabId?: string) => {
+    setActiveCategory(categoryId);
+    if (tabId) {
+      setActiveTab(tabId);
+    } else {
+      // Reset to first tab when category changes
+      const category = adminCategories.find(c => c.id === categoryId);
+      if (category && category.tabs.length > 0) {
+        setActiveTab(category.tabs[0].id);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -65,13 +175,14 @@ const AdminDashboard = () => {
         onCategoryChange={(categoryId) => {
           setActiveCategory(categoryId);
           // Reset to first tab when category changes
-          const category = adminCategories.find(c => c.id === categoryId);
+          const category = filteredCategories.find(c => c.id === categoryId);
           if (category && category.tabs.length > 0) {
             setActiveTab(category.tabs[0].id);
           }
         }}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        categories={filteredCategories}
       />
 
       {/* Main Content Area */}
@@ -81,6 +192,11 @@ const AdminDashboard = () => {
           activeCategory={activeCategory}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onNavigate={(categoryId, tabId) => {
+            setActiveCategory(categoryId);
+            setActiveTab(tabId);
+          }}
+          categories={filteredCategories}
         />
 
         {/* Content Area */}
@@ -94,9 +210,13 @@ const AdminDashboard = () => {
           <AdminContent 
             activeCategory={activeCategory}
             activeTab={activeTab}
+            categories={filteredCategories}
           />
         </motion.div>
       </div>
+
+      {/* AI Assistant */}
+      <AIAssistant onNavigate={handleAINavigation} />
     </div>
   );
 };
@@ -113,14 +233,16 @@ export const adminCategories: AdminCategory[] = [
     ),
     tabs: [
       { id: 'overview', name: 'Overview', component: AnalyticsOverview },
-      { id: 'leads', name: 'Lead Analysis', component: () => <div>Lead Analysis Content</div> },
-      { id: 'marketing', name: 'Marketing Analysis', component: () => <div>Marketing Analysis Content</div> },
-      { id: 'realtime', name: 'Real-time Tracking', component: () => <div>Real-time Content</div> }
+      { id: 'steps', name: 'Step Analytics', component: StepAnalyticsDashboard },
+      { id: 'leads', name: 'Lead Analysis', component: LeadAnalytics },
+      { id: 'marketing', name: 'Marketing Analysis', component: MarketingAnalytics },
+      { id: 'realtime', name: 'Real-time Tracking', component: RealTimeTracking },
+      { id: 'visitors', name: 'Visitor Tracking', component: VisitorTrackingDashboard }
     ]
   },
   {
     id: 'lead-management',
-    name: 'Lead Management',
+    name: 'CRM',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -129,8 +251,9 @@ export const adminCategories: AdminCategory[] = [
     tabs: [
       { id: 'all-leads', name: 'All Leads', component: LeadsManagement },
       { id: 'lead-analysis', name: 'Lead Analysis', component: AllLeads },
-      { id: 'duplicates', name: 'Duplicate Analysis', component: () => <div>Duplicate Analysis Content</div> },
-      { id: 'reports', name: 'Export/Reports', component: () => <div>Reports Content</div> }
+      { id: 'visitor-analysis', name: 'Visitor Analysis', component: VisitorAnalysis },
+      { id: 'duplicates', name: 'Duplicate Analysis', component: DuplicateAnalysis },
+      { id: 'reports', name: 'Export/Reports', component: ExportReports }
     ]
   },
   {
@@ -144,8 +267,21 @@ export const adminCategories: AdminCategory[] = [
     tabs: [
       { id: 'landing-pages', name: 'Landing Pages', component: LandingPages },
       { id: 'forms', name: 'Forms', component: FormsBuilder },
-      { id: 'templates', name: 'Templates', component: Templates },
-      { id: 'ab-testing', name: 'A/B Testing', component: ABTesting }
+      { id: 'templates', name: 'Templates', component: Templates }
+    ]
+  },
+  {
+    id: 'ab-testing',
+    name: 'A/B Testing',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    tabs: [
+      { id: 'tests', name: 'Active Tests', component: ABTesting },
+      { id: 'templates', name: 'Template Library', component: ABTesting },
+      { id: 'analytics', name: 'Analytics', component: ABTesting }
     ]
   },
   {
@@ -158,9 +294,9 @@ export const adminCategories: AdminCategory[] = [
     ),
     tabs: [
       { id: 'datalayer', name: 'DataLayer Events', component: DataLayerEvents },
-      { id: 'gtm-config', name: 'GTM Config', component: () => <div>GTM Config Content</div> },
-      { id: 'integrations', name: 'Platform Integrations', component: () => <div>Platform Integrations Content</div> },
-      { id: 'conversion-api', name: 'Conversion API', component: () => <div>Conversion API Content</div> }
+      { id: 'gtm-config', name: 'GTM Config', component: GTMConfig },
+      { id: 'integrations', name: 'Platform Integrations', component: PlatformIntegrations },
+      { id: 'conversion-api', name: 'Conversion API', component: ConversionAPI }
     ]
   },
   {
@@ -173,9 +309,9 @@ export const adminCategories: AdminCategory[] = [
     ),
     tabs: [
       { id: 'chatbot', name: 'Chatbot Query', component: ChatbotQuery },
-      { id: 'auto-reports', name: 'Auto Reports', component: () => <div>Auto Reports Content</div> },
-      { id: 'recommendations', name: 'Recommendations', component: () => <div>Recommendations Content</div> },
-      { id: 'alerts', name: 'Performance Alerts', component: () => <div>Performance Alerts Content</div> }
+      { id: 'auto-reports', name: 'Auto Reports', component: AutoReports },
+      { id: 'recommendations', name: 'Recommendations', component: Recommendations },
+      { id: 'alerts', name: 'Performance Alerts', component: PerformanceAlerts }
     ]
   },
   {
@@ -203,9 +339,9 @@ export const adminCategories: AdminCategory[] = [
     ),
     tabs: [
       { id: 'profile', name: 'My Profile', component: UserProfile },
-      { id: 'admin-users', name: 'Manage Users', component: () => <div>Admin Users Content</div> },
-      { id: 'permissions', name: 'Permissions', component: () => <div>Permissions Content</div> },
-      { id: 'activity-logs', name: 'Activity Logs', component: () => <div>Activity Logs Content</div> }
+      { id: 'admin-users', name: 'Manage Users', component: ManageUsers },
+      { id: 'permissions', name: 'Permissions', component: Permissions },
+      { id: 'activity-logs', name: 'Activity Logs', component: ActivityLogs }
     ]
   },
   {
@@ -218,12 +354,21 @@ export const adminCategories: AdminCategory[] = [
       </svg>
     ),
     tabs: [
+      { id: 'general', name: 'General Settings', component: GeneralSettings },
       { id: 'api-config', name: 'API Configuration', component: APIConfiguration },
       { id: 'solar-pricing', name: 'Solar Pricing', component: SolarPricing },
-      { id: 'database', name: 'Database', component: () => <div>Database Content</div> },
-      { id: 'backup', name: 'Backup', component: () => <div>Backup Content</div> }
+      { id: 'database', name: 'Database', component: DatabaseSettings },
+      { id: 'backup', name: 'Backup', component: BackupSettings }
     ]
   }
 ];
+
+const AdminDashboard = () => {
+  return (
+    <AdminContextProvider>
+      <AdminDashboardContent />
+    </AdminContextProvider>
+  );
+};
 
 export default AdminDashboard;

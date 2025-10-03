@@ -14,6 +14,7 @@ import { ProcessedBuildingData, LivePanelCalculation } from '@/solar-api/types/b
 import LeadCaptureForm from './calculator/LeadCaptureForm';
 import leadsService from '@/services/leadsService';
 import { webhookService } from '@/services/webhookService';
+import { analyticsService } from '@/services/analyticsService';
 import { trackConversionEvent } from '@/utils/adminSettings';
 
 interface CalculatorModalProps {
@@ -24,6 +25,25 @@ interface CalculatorModalProps {
 const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const { selectedState, selectedSolution, setSelectedState, setSelectedSolution } = useStore();
+  const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15));
+  const [visitorUserId] = useState(() => {
+    // Check if we're on the client side
+    if (typeof window === 'undefined') return 'visitor_temp';
+    
+    // Check if visitor ID exists in localStorage
+    const stored = localStorage.getItem('visitor_user_id');
+    if (stored) return stored;
+    
+    // Generate new visitor user ID
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substr(2, 9);
+    const newId = `visitor_${timestamp}_${randomStr}`;
+    localStorage.setItem('visitor_user_id', newId);
+    return newId;
+  });
+  const [pageStartTime] = useState(() => Date.now());
+  const [scrollDepth, setScrollDepth] = useState(0);
+  const [userActions, setUserActions] = useState<any[]>([]);
   
   // Search functionality state
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,6 +60,45 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
 
   // Building insights service
   const buildingInsightsService = new BuildingInsightsService();
+
+  // Enhanced visitor tracking function
+  const trackVisitor = async (page: string = 'solar-calculator', additionalData: any = {}) => {
+    try {
+      const stayTime = Math.floor((Date.now() - pageStartTime) / 1000);
+      
+      await fetch('/api/track-visitor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          page,
+          referrer: document.referrer || null,
+          sessionId: sessionId,
+          visitorUserId: visitorUserId,
+          stayTime,
+          scrollDepth,
+          actions: userActions,
+          leadId: null,
+          ...additionalData
+        })
+      });
+    } catch (error) {
+      console.error('Failed to track visitor:', error);
+    }
+  };
+
+  // Track user actions
+  const trackAction = (action: string, element: string, data?: any) => {
+    const actionData = {
+      action,
+      element,
+      timestamp: new Date().toISOString(),
+      step: currentStep,
+      data
+    };
+    setUserActions(prev => [...prev, actionData]);
+  };
 
   // Lead capture handler
   const handleLeadSubmission = async (leadData: any) => {
@@ -62,6 +121,24 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
       // Save lead to service
       const newLead = await leadsService.createLead(leadWithSystemDetails);
       
+      // Track lead conversion
+      try {
+        await fetch('/api/track-visitor', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            page: 'solar-calculator-conversion',
+            referrer: document.referrer || null,
+            sessionId: sessionId,
+            leadId: newLead.id
+          })
+        });
+      } catch (trackingError) {
+        console.error('Failed to track lead conversion:', trackingError);
+      }
+      
       // Send to webhooks
       try {
         const webhookPayload = webhookService.createPayloadFromLead(newLead);
@@ -71,6 +148,13 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
         console.error('Failed to send lead to webhooks:', webhookError);
         // Don't fail the lead capture if webhooks fail
       }
+      
+      // Track analytics conversion
+      analyticsService.trackConversion({
+        leadId: newLead.id,
+        systemDetails,
+        leadData
+      });
       
       // Track conversion event
       await trackConversionEvent('generate_lead', {
@@ -199,23 +283,59 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      
+      // Track calculator start
+      analyticsService.trackStepEntry(1);
+      
+      // Track visitor with enhanced data
+      trackVisitor('solar-calculator-start');
+      trackAction('modal_open', 'calculator_modal');
+
+      // Add scroll tracking
+      const handleScroll = () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercentage = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        setScrollDepth(Math.max(scrollDepth, scrollPercentage));
+      };
+
+      window.addEventListener('scroll', handleScroll);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
+      window.removeEventListener('scroll', () => {}); // cleanup scroll listener
       document.body.style.overflow = 'auto';
     };
   }, [isOpen, onClose]);
 
   const nextStep = () => {
     if (currentStep < steps.length) {
+      // Track step completion and navigation
+      trackAction('step_navigation', 'next_button', { from: currentStep, to: currentStep + 1 });
+      analyticsService.trackStepCompletion(currentStep, {
+        selectedState: selectedState,
+        selectedSolution: selectedSolution,
+        searchQuery: searchQuery,
+        selectedAddress: selectedAddress,
+        panelCount: panelCount
+      });
+      
       setCurrentStep(currentStep + 1);
+      
+      // Track new step entry and visitor
+      analyticsService.trackStepEntry(currentStep + 1);
+      trackVisitor(`solar-calculator-step-${currentStep + 1}`);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
+      trackAction('step_navigation', 'prev_button', { from: currentStep, to: currentStep - 1 });
       setCurrentStep(currentStep - 1);
+      // Track step entry when going back
+      analyticsService.trackStepEntry(currentStep - 1);
+      trackVisitor(`solar-calculator-step-${currentStep - 1}`);
     }
   };
 
@@ -344,6 +464,9 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
     setSearchQuery(address);
     setShowSuggestions(false);
     setShowMap(true);
+    
+    // Track address search
+    analyticsService.trackAddressSearch(searchQuery, address, currentLocation);
   };
 
   // Handle Enter key press
@@ -352,6 +475,9 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
       setSelectedAddress(searchQuery);
       setShowMap(true);
       setShowSuggestions(false);
+      
+      // Track address search
+      analyticsService.trackAddressSearch(searchQuery, searchQuery, currentLocation);
     }
   };
 
@@ -374,7 +500,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyPress}
                 placeholder="Enter your address or postcode"
-                className="w-full p-4 pr-12 text-lg border-2 border-gray-300 rounded-full focus:ring-2 focus:ring-primary focus:border-primary outline-none shadow-sm"
+                className="w-full p-4 pr-12 text-lg text-gray-900 placeholder-gray-400 border-2 border-gray-300 rounded-full focus:ring-2 focus:ring-primary focus:border-primary outline-none shadow-sm"
               />
               <button className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,6 +562,14 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                   }}
                   onLocationChange={(lat, lng) => {
                     setCurrentLocation({ lat, lng });
+                  }}
+                  onSearchAgain={() => {
+                    // Reset the search state
+                    setShowMap(false);
+                    setSelectedAddress('');
+                    setSearchQuery('');
+                    setShowSuggestions(false);
+                    setSuggestions([]);
                   }}
                 />
               </div>
@@ -1571,10 +1705,14 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
         >
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ 
+              type: 'tween',
+              duration: 0.3,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}
             className="bg-white w-full h-full overflow-hidden flex flex-col"
           >
             {/* Close Button */}

@@ -1,14 +1,15 @@
 'use client';
 
-import { adminCategories } from './AdminDashboard';
+import { adminCategories, AdminCategory } from './AdminDashboard';
 
 interface AdminContentProps {
   activeCategory: string;
   activeTab: string;
+  categories?: AdminCategory[];
 }
 
-const AdminContent = ({ activeCategory, activeTab }: AdminContentProps) => {
-  const currentCategory = adminCategories.find(cat => cat.id === activeCategory);
+const AdminContent = ({ activeCategory, activeTab, categories = adminCategories }: AdminContentProps) => {
+  const currentCategory = categories.find(cat => cat.id === activeCategory);
   const currentTab = currentCategory?.tabs.find(tab => tab.id === activeTab);
 
   if (!currentTab) {

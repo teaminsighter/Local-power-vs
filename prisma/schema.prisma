@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,16 +8,35 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
-  role      Role     @default(VIEWER)
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String        @id @default(cuid())
+  email       String        @unique
+  firstName   String        @map("first_name")
+  lastName    String        @map("last_name")
+  role        Role          @default(VIEWER)
+  isActive    Boolean       @default(true) @map("is_active")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  permissions UserPermission[]
 
   @@map("users")
+}
+
+model UserPermission {
+  id         String @id @default(cuid())
+  userId     String @map("user_id")
+  category   String // e.g., 'analytics', 'lead-management', 'page-builder'
+  tab        String // e.g., 'overview', 'steps', 'leads'
+  canView    Boolean @default(false) @map("can_view")
+  canEdit    Boolean @default(false) @map("can_edit")
+  canDelete  Boolean @default(false) @map("can_delete")
+  canExport  Boolean @default(false) @map("can_export")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, tab])
+  @@index([userId])
+  @@map("user_permissions")
 }
 
 model Lead {
@@ -38,29 +54,65 @@ model Lead {
   notes             String?
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
-
-  systemDetails SystemDetails?
+  
+  // Enhanced Tracking Fields
+  dateCreated         DateTime? @map("date_created")
+  dateModified        DateTime? @map("date_modified")
+  
+  // UTM Parameters
+  utmCampaign         String? @map("utm_campaign")
+  utmSource           String? @map("utm_source")
+  utmMedium           String? @map("utm_medium")
+  utmContent          String? @map("utm_content")
+  utmKeyword          String? @map("utm_keyword")
+  utmPlacement        String? @map("utm_placement")
+  
+  // URL Tracking IDs
+  gclid               String? @map("gclid")
+  fbclid              String? @map("fbclid")
+  
+  // User/Device Information
+  visitorUserId       String? @map("visitor_user_id")
+  ipAddress           String? @map("ip_address")
+  device              String? @map("device")
+  displayAspectRatio  String? @map("display_aspect_ratio")
+  defaultLocation     String? @map("default_location")
+  
+  // Form Tracking
+  formId              String? @map("form_id")
+  formClass           String? @map("form_class")
+  formName            String? @map("form_name")
+  
+  // A/B Test Tracking
+  abTestId            String? @map("ab_test_id")
+  abVariant           ABVariant? @map("ab_variant")
+  
+  // Visit URL Tracking
+  firstVisitUrl       String? @map("first_visit_url")
+  lastVisitUrl        String? @map("last_visit_url")
+  
+  systemDetails       SystemDetails?
+  abTest              ABTest? @relation(fields: [abTestId], references: [id])
 
   @@map("leads")
 }
 
 model SystemDetails {
-  id            String  @id @default(cuid())
-  leadId        String  @unique @map("lead_id")
-  systemSize    Float   @map("system_size")
-  estimatedCost Float   @map("estimated_cost")
-  annualSavings Float   @map("annual_savings")
-  paybackPeriod Float   @map("payback_period")
-  panelCount    Int     @map("panel_count")
-  roofArea      Float   @map("roof_area")
-  monthlyBill   Float   @map("monthly_bill")
-  usageKwh      Float   @map("usage_kwh")
+  id            String   @id @default(cuid())
+  leadId        String   @unique @map("lead_id")
+  systemSize    Float    @map("system_size")
+  estimatedCost Float    @map("estimated_cost")
+  annualSavings Float    @map("annual_savings")
+  paybackPeriod Float    @map("payback_period")
+  panelCount    Int      @map("panel_count")
+  roofArea      Float    @map("roof_area")
+  monthlyBill   Float    @map("monthly_bill")
+  usageKwh      Float    @map("usage_kwh")
   address       String
-  propertyType  String  @map("property_type")
-  roofType      String  @map("roof_type")
+  propertyType  String   @map("property_type")
+  roofType      String   @map("roof_type")
   createdAt     DateTime @default(now()) @map("created_at")
-
-  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@map("system_details")
 }
@@ -89,46 +141,79 @@ model LandingPage {
   seoDescription String?         @map("seo_description")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
-
   abTestVariants ABTestVariant[]
 
   @@map("landing_pages")
 }
 
 model ABTest {
-  id                      String   @id @default(cuid())
-  name                    String
-  description             String?
-  status                  TestStatus @default(DRAFT)
-  startDate               DateTime? @map("start_date")
-  endDate                 DateTime? @map("end_date")
-  confidenceLevel         Float    @default(95) @map("confidence_level")
-  minimumSampleSize       Int      @default(100) @map("minimum_sample_size")
-  statisticalSignificance Float    @default(0) @map("statistical_significance")
-  winnerVariant           String?  @map("winner_variant")
-  createdAt               DateTime @default(now()) @map("created_at")
-  updatedAt               DateTime @updatedAt @map("updated_at")
-
-  variants ABTestVariant[]
+  id                  String @id @default(cuid())
+  name                String
+  description         String?
+  url                 String
+  urlMatchType        URLMatchType @default(EXACT) @map("url_match_type")
+  status              ABTestStatus @default(DRAFT)
+  
+  // Assignment Configuration
+  assignmentType      AssignmentType @default(FIFTY_FIFTY) @map("assignment_type")
+  customSplitA        Int @default(50) @map("custom_split_a")
+  customSplitB        Int @default(50) @map("custom_split_b")
+  
+  // Landing Page Content (references to ABTestTemplate)
+  templateAId         String? @map("template_a_id")
+  templateBId         String? @map("template_b_id")
+  landingPageA        Json? @map("landing_page_a")  // Custom HTML content
+  landingPageB        Json? @map("landing_page_b")  // Custom HTML content
+  
+  // Performance Metrics
+  visitsA             Int @default(0) @map("visits_a")
+  visitsB             Int @default(0) @map("visits_b")
+  conversionsA        Int @default(0) @map("conversions_a")
+  conversionsB        Int @default(0) @map("conversions_b")
+  
+  // Statistical Analysis
+  conversionRateA     Float @default(0) @map("conversion_rate_a")
+  conversionRateB     Float @default(0) @map("conversion_rate_b")
+  confidenceLevel     Float @default(95) @map("confidence_level")
+  minimumSampleSize   Int @default(100) @map("minimum_sample_size")
+  statisticalSignificance Boolean @default(false) @map("statistical_significance")
+  winnerVariant       ABVariant? @map("winner_variant")
+  
+  // Test Duration
+  startDate           DateTime? @map("start_date")
+  endDate             DateTime? @map("end_date")
+  
+  // Metadata
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  createdBy           String? @map("created_by")
+  
+  // Relations
+  templateA           ABTestTemplate? @relation("TemplateA", fields: [templateAId], references: [id])
+  templateB           ABTestTemplate? @relation("TemplateB", fields: [templateBId], references: [id])
+  assignments         ABTestAssignment[]
+  leads               Lead[]
+  variants            ABTestVariant[] // Keep for backward compatibility
 
   @@map("ab_tests")
 }
 
 model ABTestVariant {
-  id             String   @id @default(cuid())
-  testId         String   @map("test_id")
+  id             String      @id @default(cuid())
+  testId         String      @map("test_id")
   name           String
-  pageId         String   @map("page_id")
-  trafficSplit   Float    @map("traffic_split")
-  views          Int      @default(0)
-  conversions    Int      @default(0)
-  conversionRate Float    @default(0) @map("conversion_rate")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  pageId         String      @map("page_id")
+  trafficSplit   Float       @map("traffic_split")
+  views          Int         @default(0)
+  conversions    Int         @default(0)
+  conversionRate Float       @default(0) @map("conversion_rate")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  page           LandingPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  test           ABTest      @relation(fields: [testId], references: [id], onDelete: Cascade)
 
-  test ABTest      @relation(fields: [testId], references: [id], onDelete: Cascade)
-  page LandingPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
-
+  @@index([pageId], map: "ab_test_variants_page_id_fkey")
+  @@index([testId], map: "ab_test_variants_test_id_fkey")
   @@map("ab_test_variants")
 }
 
@@ -164,4 +249,166 @@ enum TestStatus {
   RUNNING   @map("running")
   PAUSED    @map("paused")
   COMPLETED @map("completed")
+}
+
+model VisitorTracking {
+  id          String   @id @default(cuid())
+  visitorUserId String? @map("visitor_user_id")
+  ipAddress   String   @map("ip_address")
+  country     String?
+  city        String?
+  region      String?
+  userAgent   String?  @map("user_agent")
+  page        String
+  referrer    String?
+  sessionId   String?  @map("session_id")
+  deviceType  String?  @map("device_type")
+  browser     String?
+  os          String?
+  isBot       Boolean  @default(false) @map("is_bot")
+  timestamp   DateTime @default(now())
+  leadId      String?  @map("lead_id")
+  stayTime    Int?     @map("stay_time") // in seconds
+  exitPage    String?  @map("exit_page")
+  actions     Json?    // track user actions on page
+  scrollDepth Float?   @map("scroll_depth") // percentage scrolled
+
+  @@index([ipAddress])
+  @@index([sessionId])
+  @@index([timestamp])
+  @@index([visitorUserId])
+  @@map("visitor_tracking")
+}
+
+model VisitorProfile {
+  id                String   @id @default(cuid())
+  visitorUserId     String   @unique @map("visitor_user_id")
+  fingerprint       String?  @unique
+  firstName         String?  @map("first_name")
+  lastName          String?  @map("last_name")
+  email             String?
+  phone             String?
+  firstVisit        DateTime @map("first_visit")
+  lastVisit         DateTime @map("last_visit")
+  totalVisits       Int      @default(1) @map("total_visits")
+  totalSessionTime  Int      @default(0) @map("total_session_time") // total seconds
+  totalPagesViewed  Int      @default(0) @map("total_pages_viewed")
+  conversionScore   Float    @default(0) @map("conversion_score")
+  isFrequentVisitor Boolean  @default(false) @map("is_frequent_visitor")
+  leadScore         Int      @default(0) @map("lead_score")
+  tags              String?  // comma separated tags
+  notes             String?
+  status            VisitorStatus @default(ANONYMOUS)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("visitor_profiles")
+}
+
+model VisitorSession {
+  id              String   @id @default(cuid())
+  visitorUserId   String   @map("visitor_user_id")
+  sessionId       String   @map("session_id")
+  startTime       DateTime @map("start_time")
+  endTime         DateTime? @map("end_time")
+  duration        Int?     // in seconds
+  pagesVisited    Json     @map("pages_visited") // array of pages with timestamps
+  actionsPerformed Json    @map("actions_performed") // user interactions
+  entryPage       String   @map("entry_page")
+  exitPage        String?  @map("exit_page")
+  referrer        String?
+  deviceInfo      Json     @map("device_info")
+  conversionEvents Json?   @map("conversion_events")
+  dropOffPoint    String?  @map("drop_off_point")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([visitorUserId])
+  @@index([sessionId])
+  @@index([startTime])
+  @@map("visitor_sessions")
+}
+
+enum VisitorStatus {
+  ANONYMOUS    @map("anonymous")
+  IDENTIFIED   @map("identified")
+  LEAD         @map("lead")
+  CUSTOMER     @map("customer")
+}
+
+// Enhanced A/B Testing System Models
+
+model ABTestTemplate {
+  id                  String @id @default(cuid())
+  name                String
+  description         String?
+  category            String @default("general") // "landing", "popup", "form", etc.
+  thumbnail           String? // preview image URL
+  content             Json    // HTML/CSS/JS content
+  variables           Json?   // configurable variables
+  isActive            Boolean @default(true) @map("is_active")
+  usageCount          Int @default(0) @map("usage_count")
+  
+  // Metadata
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  createdBy           String @map("created_by")
+  
+  // Relations
+  testsAsA            ABTest[] @relation("TemplateA")
+  testsAsB            ABTest[] @relation("TemplateB")
+  
+  @@map("ab_test_templates")
+}
+
+model ABTestAssignment {
+  id                  String @id @default(cuid())
+  testId              String @map("test_id")
+  visitorUserId       String @map("visitor_user_id")
+  variant             ABVariant
+  assignedAt          DateTime @default(now()) @map("assigned_at")
+  converted           Boolean @default(false)
+  conversionAt        DateTime? @map("conversion_at")
+  conversionValue     Float? @map("conversion_value")
+  ipAddress           String? @map("ip_address")
+  userAgent           String? @map("user_agent")
+  sessionId           String? @map("session_id")
+  
+  // Performance Tracking
+  timeOnPage          Int? @map("time_on_page") // seconds
+  bounceRate          Boolean @default(false) @map("bounce_rate")
+  pagesViewed         Int @default(1) @map("pages_viewed")
+  
+  // Relations
+  test                ABTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  @@unique([testId, visitorUserId])
+  @@index([testId])
+  @@index([visitorUserId])
+  @@map("ab_test_assignments")
+}
+
+// A/B Testing Enums
+enum ABTestStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum AssignmentType {
+  FIFTY_FIFTY      // 50-50 random split
+  ALTERNATING      // A-B-A-B sequential pattern
+  CUSTOM_SPLIT     // Custom percentage split
+}
+
+enum URLMatchType {
+  EXACT            // Exact URL match
+  PATTERN          // Pattern matching with wildcards
+  REGEX            // Regular expression matching
+}
+
+enum ABVariant {
+  A
+  B
 }

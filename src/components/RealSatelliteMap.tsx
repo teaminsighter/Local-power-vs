@@ -9,12 +9,14 @@ interface RealSatelliteMapProps {
   address: string;
   onLocationConfirmed: () => void;
   onLocationChange?: (lat: number, lng: number) => void;
+  onSearchAgain?: () => void;
 }
 
 const RealSatelliteMap = ({ 
   address, 
   onLocationConfirmed,
-  onLocationChange 
+  onLocationChange,
+  onSearchAgain
 }: RealSatelliteMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -218,9 +220,10 @@ const RealSatelliteMap = ({
         <div className="flex gap-4 justify-center">
           <motion.button
             onClick={() => {
-              // Clear the map and go back to search
-              setCurrentLocation(null);
-              setError(null);
+              // Call the parent's search again function to reset the search state
+              if (onSearchAgain) {
+                onSearchAgain();
+              }
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

@@ -1,7 +1,7 @@
-# Hostinger Deployment Guide for Solar Calculator Platform
+# Hostinger Deployment Guide for A/B Testing Solar Platform
 
 ## Overview
-This guide covers deploying your Next.js solar calculator platform to Hostinger with database integration.
+This guide covers deploying your Next.js solar platform with production-ready A/B testing system to Hostinger.
 
 ## Prerequisites
 - Hostinger Premium or Business hosting plan
@@ -317,4 +317,189 @@ runMigrations().catch(console.error);
    - Monitor error logs
    - Track performance metrics
 
-Your solar calculator platform is now ready for production on Hostinger!
+## A/B Testing Campaign Setup
+
+### 1. Create Your First Campaign
+
+**Via Admin Panel:**
+1. Go to `/admin` and login
+2. Navigate to A/B Testing section
+3. Click "Create New Campaign"
+4. Fill in campaign details:
+   - Campaign Name: "Solar Calculator CTA Test"
+   - UTM Campaign: "solar_cta_q4_2024"
+   - Target URL: "/"
+
+### 2. Create A/B Test Variants
+
+**Variant A (Control):**
+```json
+{
+  "name": "Original Homepage",
+  "content": {
+    "text": {
+      ".hero-title": "Get Your Free Solar Quote Today",
+      ".cta-button": "Calculate My Savings"
+    },
+    "attributes": {
+      ".cta-button": {
+        "style": "background-color: #3b82f6; color: white;"
+      }
+    }
+  }
+}
+```
+
+**Variant B (Test):**
+```json
+{
+  "name": "Urgency-Focused Homepage",
+  "content": {
+    "text": {
+      ".hero-title": "Lock in 30% Tax Credits - Ending Soon!",
+      ".cta-button": "Claim My Tax Credit"
+    },
+    "attributes": {
+      ".cta-button": {
+        "style": "background-color: #dc2626; color: white; animation: pulse 2s infinite;"
+      }
+    },
+    "classes": {
+      ".hero-section": ["urgency-theme", "highlight-border"]
+    }
+  }
+}
+```
+
+### 3. Implement Client-Side Tracking
+
+**Add to your main layout or homepage:**
+```jsx
+import ABTestTracker, { useABTest } from '@/components/ABTestTracker';
+
+export default function HomePage() {
+  const { isVariantB, trackConversion } = useABTest();
+  
+  const handleFormSubmit = async () => {
+    // Track conversion when form is submitted
+    await trackConversion('lead_generation', 100, {
+      source: 'homepage_form',
+      variant: isVariantB ? 'B' : 'A'
+    });
+  };
+
+  return (
+    <ABTestTracker>
+      <div className="hero-section">
+        <h1 className="hero-title">Get Your Free Solar Quote Today</h1>
+        <button 
+          className="cta-button"
+          onClick={handleFormSubmit}
+        >
+          Calculate My Savings
+        </button>
+      </div>
+    </ABTestTracker>
+  );
+}
+```
+
+### 4. Launch Campaign
+
+**Start A/B Test:**
+1. Set minimum sample size (recommend 1000+ visitors)
+2. Set confidence level (95% recommended)
+3. Click "Start Test"
+4. Monitor real-time results in admin dashboard
+
+## Campaign URLs for Traffic Sources
+
+### Google Ads URLs
+```
+https://yourdomain.com/?utm_source=google&utm_medium=cpc&utm_campaign=solar_cta_q4_2024&utm_content=ad_variant_1
+```
+
+### Facebook Ads URLs
+```
+https://yourdomain.com/?utm_source=facebook&utm_medium=social&utm_campaign=solar_cta_q4_2024&utm_content=ad_variant_1
+```
+
+### Email Campaign URLs
+```
+https://yourdomain.com/?utm_source=email&utm_medium=newsletter&utm_campaign=solar_cta_q4_2024&utm_content=header_cta
+```
+
+## Monitoring & Analytics
+
+### Real-Time Dashboard
+- Access at `/admin/analytics`
+- Monitor conversion rates by variant
+- Track statistical significance
+- View visitor demographics
+
+### Key Metrics to Monitor
+- **Conversion Rate:** Percentage of visitors who complete desired action
+- **Statistical Significance:** Confidence in results (wait for 95%+)
+- **Sample Size:** Ensure minimum 1000 visitors per variant
+- **Test Duration:** Run for at least 1-2 weeks for reliable data
+
+### Auto-Optimization
+The system will automatically:
+- Stop tests when statistical significance is reached
+- Declare winning variants
+- Archive completed tests
+- Send notifications for important events
+
+## Campaign Types You Can Run
+
+### 1. Homepage Hero Tests
+- Headlines and value propositions
+- CTA button text and colors
+- Hero images and videos
+- Form layouts
+
+### 2. Landing Page Tests
+- Page layouts and designs
+- Content length and structure
+- Social proof placement
+- Pricing displays
+
+### 3. Form Optimization
+- Number of fields
+- Field labels and placeholders
+- Submit button text
+- Progress indicators
+
+### 4. Email Campaigns
+- Subject lines
+- Email content and layout
+- CTA placement and text
+- Send times and frequency
+
+## Best Practices
+
+### 1. Test Planning
+- One primary goal per test
+- Significant changes between variants
+- Clear hypothesis before starting
+- Predetermined success metrics
+
+### 2. Traffic Requirements
+- Minimum 1000 visitors per variant
+- Run for at least 1-2 weeks
+- Account for traffic patterns (weekends, holidays)
+- Consider seasonal variations
+
+### 3. Statistical Validity
+- Wait for 95%+ confidence before calling winners
+- Don't peek at results too early
+- Account for multiple testing if running several tests
+- Document all test results
+
+### 4. Implementation
+- Test thoroughly before launch
+- Ensure tracking is working correctly
+- Monitor for technical issues
+- Have rollback plan ready
+
+Your A/B testing solar platform is now ready for production campaigns on Hostinger!

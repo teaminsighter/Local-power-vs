@@ -1,0 +1,260 @@
+/* Admin Panel Theme Variables */
+:root {
+  /* Navigation */
+  --admin-nav-bg: #146443;
+  --admin-nav-text: #ffffff;
+  --admin-nav-active-bg: #1a7f5a;
+  --admin-nav-active-text: #ffffff;
+  --admin-nav-hover-bg: #0f5537;
+  --admin-nav-border: #0f4630;
+  
+  /* Buttons */
+  --admin-btn-primary-bg: #146443;
+  --admin-btn-primary-text: #ffffff;
+  --admin-btn-primary-hover: #1a7f5a;
+  --admin-btn-secondary-bg: #ffffff;
+  --admin-btn-secondary-text: #374151;
+  --admin-btn-secondary-border: #d1d5db;
+  
+  /* General Colors */
+  --admin-primary: #146443;
+  --admin-secondary: #059669;
+  --admin-bg: #f9fafb;
+  --admin-surface: #ffffff;
+  --admin-border: #e5e7eb;
+  
+  /* Text Colors */
+  --admin-title: #111827;
+  --admin-subtitle: #6b7280;
+  --admin-body-text: #374151;
+  --admin-muted-text: #9ca3af;
+  
+  /* Status Colors */
+  --admin-success: #10b981;
+  --admin-warning: #f59e0b;
+  --admin-error: #ef4444;
+  --admin-info: #3b82f6;
+}
+
+/* Apply theme to admin navigation */
+.admin-sidebar {
+  background-color: var(--admin-nav-bg) !important;
+  color: var(--admin-nav-text) !important;
+  border-color: var(--admin-nav-border) !important;
+}
+
+.admin-sidebar .nav-item {
+  color: var(--admin-nav-text) !important;
+}
+
+.admin-sidebar .nav-item:hover {
+  background-color: var(--admin-nav-hover-bg) !important;
+}
+
+.admin-sidebar .nav-item.active {
+  background-color: var(--admin-nav-active-bg) !important;
+  color: var(--admin-nav-active-text) !important;
+}
+
+.admin-sidebar .nav-item.active svg {
+  color: var(--admin-nav-active-text) !important;
+}
+
+.admin-sidebar .nav-item svg {
+  color: var(--admin-nav-text) !important;
+}
+
+/* Apply theme to buttons */
+.btn-primary {
+  background-color: var(--admin-btn-primary-bg) !important;
+  color: var(--admin-btn-primary-text) !important;
+  border-color: var(--admin-btn-primary-bg) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--admin-btn-primary-hover) !important;
+  border-color: var(--admin-btn-primary-hover) !important;
+}
+
+.btn-secondary {
+  background-color: var(--admin-btn-secondary-bg) !important;
+  color: var(--admin-btn-secondary-text) !important;
+  border-color: var(--admin-btn-secondary-border) !important;
+}
+
+/* Apply theme to titles and text */
+.admin-title, h1, h2, h3, h4, h5, h6 {
+  color: var(--admin-title) !important;
+}
+
+.admin-subtitle, .text-gray-600 {
+  color: var(--admin-subtitle) !important;
+}
+
+.admin-body-text {
+  color: var(--admin-body-text) !important;
+}
+
+.admin-muted-text, .text-gray-500 {
+  color: var(--admin-muted-text) !important;
+}
+
+/* Apply theme to surfaces and backgrounds */
+.admin-surface, .bg-white {
+  background-color: var(--admin-surface) !important;
+}
+
+.admin-background {
+  background-color: var(--admin-bg) !important;
+}
+
+.admin-border, .border-gray-200, .border-gray-300 {
+  border-color: var(--admin-border) !important;
+}
+
+/* Status colors */
+.text-green-600, .bg-green-600 {
+  color: var(--admin-success) !important;
+  background-color: var(--admin-success) !important;
+}
+
+.text-yellow-600, .bg-yellow-600 {
+  color: var(--admin-warning) !important;
+  background-color: var(--admin-warning) !important;
+}
+
+.text-red-600, .bg-red-600 {
+  color: var(--admin-error) !important;
+  background-color: var(--admin-error) !important;
+}
+
+.text-blue-600, .bg-blue-600 {
+  color: var(--admin-info) !important;
+  background-color: var(--admin-info) !important;
+}
+
+/* Specific admin panel elements */
+.sidebar-nav {
+  background-color: var(--admin-nav-bg) !important;
+}
+
+.sidebar-nav a {
+  color: var(--admin-nav-text) !important;
+}
+
+.sidebar-nav a:hover {
+  background-color: var(--admin-nav-hover-bg) !important;
+}
+
+.sidebar-nav a.active {
+  background-color: var(--admin-nav-active-bg) !important;
+  color: var(--admin-nav-active-text) !important;
+}
+
+/* Primary action buttons */
+button[style*="background-color: #146443"], 
+button[style*="backgroundColor: #146443"],
+.bg-blue-600,
+.bg-green-600 {
+  background-color: var(--admin-btn-primary-bg) !important;
+  color: var(--admin-btn-primary-text) !important;
+}
+
+button[style*="background-color: #146443"]:hover,
+button[style*="backgroundColor: #146443"]:hover,
+.bg-blue-600:hover,
+.bg-green-600:hover {
+  background-color: var(--admin-btn-primary-hover) !important;
+}
+
+/* Tailwind color overrides for admin panel */
+.admin-panel .text-gray-900 {
+  color: var(--admin-title) !important;
+}
+
+.admin-panel .text-gray-600 {
+  color: var(--admin-subtitle) !important;
+}
+
+.admin-panel .text-gray-500 {
+  color: var(--admin-muted-text) !important;
+}
+
+.admin-panel .bg-gray-50 {
+  background-color: var(--admin-bg) !important;
+}
+
+.admin-panel .border-gray-200 {
+  border-color: var(--admin-border) !important;
+}
+
+/* Focus states */
+.admin-panel input:focus,
+.admin-panel select:focus,
+.admin-panel textarea:focus {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 3px rgba(var(--admin-primary), 0.1) !important;
+}
+
+/* Compact mode styles */
+.compact .admin-panel {
+  padding: 0.75rem !important;
+}
+
+.compact .admin-panel .p-6 {
+  padding: 1rem !important;
+}
+
+.compact .admin-panel .p-4 {
+  padding: 0.75rem !important;
+}
+
+.compact .admin-panel .space-y-6 > * + * {
+  margin-top: 1rem !important;
+}
+
+.compact .admin-panel .gap-6 {
+  gap: 1rem !important;
+}
+
+/* Dark mode styles */
+.dark .admin-panel {
+  background-color: #1f2937 !important;
+}
+
+.dark .admin-panel .bg-white {
+  background-color: #374151 !important;
+}
+
+.dark .admin-panel .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+.dark .admin-panel .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+.dark .admin-panel .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+.dark .admin-panel .border-gray-200 {
+  border-color: #4b5563 !important;
+}
+
+/* Override specific navigation elements in your current sidebar */
+nav[class*="bg-green"] {
+  background-color: var(--admin-nav-bg) !important;
+}
+
+nav[class*="bg-green"] a {
+  color: var(--admin-nav-text) !important;
+}
+
+nav[class*="bg-green"] a:hover {
+  background-color: var(--admin-nav-hover-bg) !important;
+}
+
+nav[class*="bg-green"] a[class*="bg-green"] {
+  background-color: var(--admin-nav-active-bg) !important;
+}

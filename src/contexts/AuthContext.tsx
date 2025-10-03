@@ -8,7 +8,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'super_admin' | 'admin' | 'viewer';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'VIEWER';
   avatar?: string;
   lastLogin?: string;
   isActive: boolean;
@@ -47,7 +47,7 @@ interface RegisterData {
   lastName: string;
   email: string;
   password: string;
-  role?: 'admin' | 'viewer';
+  role?: 'ADMIN' | 'VIEWER';
 }
 
 // Initial state
@@ -118,7 +118,7 @@ const mockUsers: User[] = [
     email: 'admin@localpower.com',
     firstName: 'Admin',
     lastName: 'User',
-    role: 'super_admin',
+    role: 'SUPER_ADMIN',
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
     lastLogin: '2024-09-26T09:00:00Z'
@@ -128,7 +128,7 @@ const mockUsers: User[] = [
     email: 'manager@localpower.com',
     firstName: 'Manager',
     lastName: 'User',
-    role: 'admin',
+    role: 'ADMIN',
     isActive: true,
     createdAt: '2024-01-15T00:00:00Z',
     lastLogin: '2024-09-25T14:30:00Z'
@@ -255,7 +255,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
-        role: userData.role || 'viewer',
+        role: userData.role || 'VIEWER',
         isActive: true,
         createdAt: new Date().toISOString(),
       };

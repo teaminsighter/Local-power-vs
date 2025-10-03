@@ -116,9 +116,12 @@ const GoogleAds = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-gray-200 shadow-sm">
+            {/* Google Ads Logo */}
+            <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="11" fill="#4285F4"/>
+              <path d="M12 2C17.5 2 22 6.5 22 12S17.5 22 12 22 2 17.5 2 12 6.5 2 12 2zM8 8h8v2H8V8zm0 3h8v2H8v-2zm0 3h5v2H8v-2z" fill="white"/>
+              <path d="M16 14l-3-3v6l3-3z" fill="#4285F4"/>
             </svg>
           </div>
           <div>
@@ -598,9 +601,13 @@ const GoogleAds = () => {
                   transition={{ delay: index * 0.1 }}
                   className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
                 >
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                    {/* Google Ads Logo */}
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L9 7V9C9 11.8 11.2 14 14 14V22H18V14C20.8 14 23 11.8 23 9H21ZM12 8C13.1 8 14 8.9 14 10S13.1 12 12 12S10 11.1 10 10S10.9 8 12 8Z" fill="#4285F4"/>
+                      <path d="M12 14C9.2 14 7 11.8 7 9V7L1 1L7 7V9C7 12.9 10.1 16 14 16H22V12H14C13.4 12 12.7 11.8 12 11.5V14Z" fill="#34A853"/>
+                      <path d="M12 14V16C15.9 16 19 12.9 19 9H17C17 11.8 14.8 14 12 14Z" fill="#FBBC05"/>
+                      <path d="M12 14C9.2 14 7 11.8 7 9H5C5 12.9 8.1 16 12 16V14Z" fill="#EA4335"/>
                     </svg>
                   </div>
                   

@@ -1,30 +1,136 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { adminCategories } from './AdminDashboard';
+import { useEffect, useState } from 'react';
+import { adminCategories, AdminCategory } from './AdminDashboard';
 
 interface AdminSidebarProps {
   activeCategory: string;
   onCategoryChange: (categoryId: string) => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  categories?: AdminCategory[];
 }
 
 const AdminSidebar = ({ 
   activeCategory, 
   onCategoryChange, 
   collapsed, 
-  onToggleCollapse 
+  onToggleCollapse,
+  categories = adminCategories
 }: AdminSidebarProps) => {
+  const [companyName, setCompanyName] = useState('Insighter.Digital');
+
+  // Load and apply saved theme settings on component mount
+  useEffect(() => {
+    const loadSavedTheme = () => {
+      if (typeof window !== 'undefined') {
+        const savedSettings = localStorage.getItem('admin-general-settings');
+        if (savedSettings) {
+          try {
+            const settings = JSON.parse(savedSettings);
+            const root = document.documentElement;
+            
+            // Apply navigation theme variables
+            if (settings.navigationBackground) {
+              root.style.setProperty('--admin-nav-bg', settings.navigationBackground);
+            }
+            if (settings.navigationTextColor) {
+              root.style.setProperty('--admin-nav-text', settings.navigationTextColor);
+            }
+            if (settings.navigationActiveBackground) {
+              root.style.setProperty('--admin-nav-active-bg', settings.navigationActiveBackground);
+            }
+            if (settings.navigationActiveTextColor) {
+              root.style.setProperty('--admin-nav-active-text', settings.navigationActiveTextColor);
+            }
+            if (settings.navigationHoverBackground) {
+              root.style.setProperty('--admin-nav-hover-bg', settings.navigationHoverBackground);
+            }
+            
+            // Apply other theme variables
+            if (settings.primaryButtonBackground) {
+              root.style.setProperty('--admin-btn-primary-bg', settings.primaryButtonBackground);
+            }
+            if (settings.primaryButtonTextColor) {
+              root.style.setProperty('--admin-btn-primary-text', settings.primaryButtonTextColor);
+            }
+            if (settings.primaryButtonHoverBackground) {
+              root.style.setProperty('--admin-btn-primary-hover', settings.primaryButtonHoverBackground);
+            }
+            if (settings.primaryColor) {
+              root.style.setProperty('--admin-primary', settings.primaryColor);
+            }
+            if (settings.backgroundColor) {
+              root.style.setProperty('--admin-bg', settings.backgroundColor);
+            }
+            if (settings.titleColor) {
+              root.style.setProperty('--admin-title', settings.titleColor);
+            }
+            if (settings.subtitleColor) {
+              root.style.setProperty('--admin-subtitle', settings.subtitleColor);
+            }
+            if (settings.surfaceColor) {
+              root.style.setProperty('--admin-surface', settings.surfaceColor);
+            }
+            if (settings.borderColor) {
+              root.style.setProperty('--admin-border', settings.borderColor);
+            }
+            
+            // Update company name if available
+            if (settings.companyName) {
+              setCompanyName(settings.companyName);
+            }
+            
+            // Apply theme class if needed
+            if (settings.theme === 'dark') {
+              document.documentElement.classList.add('dark');
+            }
+            if (settings.compactMode) {
+              document.documentElement.classList.add('compact');
+            }
+          } catch (error) {
+            console.error('Error loading saved theme settings:', error);
+          }
+        }
+      }
+    };
+    
+    loadSavedTheme();
+
+    // Listen for storage changes to update settings in real-time
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'admin-general-settings' && e.newValue) {
+        try {
+          const settings = JSON.parse(e.newValue);
+          if (settings.companyName) {
+            setCompanyName(settings.companyName);
+          }
+        } catch (error) {
+          console.error('Error parsing storage change:', error);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   return (
     <motion.div
-      className="text-white flex flex-col shadow-xl"
-      style={{ backgroundColor: '#146443' }}
+      className="text-white flex flex-col shadow-xl admin-sidebar"
+      style={{ 
+        backgroundColor: 'var(--admin-nav-bg, #146443)',
+        color: 'var(--admin-nav-text, #ffffff)'
+      }}
       animate={{ width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {/* Header */}
-      <div className="p-4 border-b border-green-700">
+      <div className="p-4 border-b" style={{ borderColor: 'var(--admin-nav-border, rgba(255,255,255,0.1))' }}>
         <div className="flex items-center justify-between">
           {!collapsed && (
             <motion.div
@@ -33,10 +139,10 @@ const AdminSidebar = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <h1 className="text-xl font-bold text-white">
-                Insighter.Digital
+              <h1 className="text-xl font-bold" style={{ color: 'var(--admin-nav-text, #ffffff)' }}>
+                {companyName}
               </h1>
-              <p className="text-xs text-gray-400 mt-1">Analytics Admin Panel</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--admin-nav-text, rgba(255,255,255,0.7))' }}>Analytics Admin Panel</p>
             </motion.div>
           )}
           
@@ -44,7 +150,16 @@ const AdminSidebar = ({
             onClick={onToggleCollapse}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="p-2 rounded-lg hover:bg-green-600 transition-colors"
+            className="p-2 rounded-lg transition-colors"
+            style={{ 
+              color: 'var(--admin-nav-text, #ffffff)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--admin-nav-hover-bg, rgba(255,255,255,0.1))';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
             <svg 
               className="w-5 h-5" 
@@ -66,27 +181,30 @@ const AdminSidebar = ({
       {/* Navigation Categories */}
       <div className="flex-1 py-4 overflow-y-auto">
         <nav className="space-y-2 px-3">
-          {adminCategories.map((category, index) => (
+          {(categories || []).map((category, index) => (
             <motion.button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
-              className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 ${
-                activeCategory === category.id
-                  ? 'text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white'
-              }`}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 shadow-lg"
               style={activeCategory === category.id ? 
-                { backgroundColor: 'rgba(255, 255, 255, 0.2)' } : 
-                {}
+                { 
+                  backgroundColor: 'var(--admin-nav-active-bg, rgba(255, 255, 255, 0.2))',
+                  color: 'var(--admin-nav-active-text, #ffffff)'
+                } : 
+                {
+                  color: 'var(--admin-nav-text, rgba(255,255,255,0.8))'
+                }
               }
               onMouseEnter={(e) => {
                 if (activeCategory !== category.id) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.backgroundColor = 'var(--admin-nav-hover-bg, rgba(255, 255, 255, 0.1))';
+                  e.currentTarget.style.color = 'var(--admin-nav-text, #ffffff)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (activeCategory !== category.id) {
                   e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--admin-nav-text, rgba(255,255,255,0.8))';
                 }
               }}
               whileHover={{ x: 4 }}
@@ -95,7 +213,14 @@ const AdminSidebar = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.3 }}
             >
-              <div className={`flex-shrink-0 ${activeCategory === category.id ? 'text-white' : 'text-gray-400'}`}>
+              <div 
+                className="flex-shrink-0"
+                style={{
+                  color: activeCategory === category.id 
+                    ? 'var(--admin-nav-active-text, #ffffff)' 
+                    : 'var(--admin-nav-text, rgba(255,255,255,0.6))'
+                }}
+              >
                 {category.icon}
               </div>
               

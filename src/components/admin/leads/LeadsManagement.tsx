@@ -25,11 +25,48 @@ const LeadsManagement = () => {
     refreshData();
   }, []);
 
-  const refreshData = () => {
-    const allLeads = leadsService.getLeads();
-    const leadsStats = leadsService.getStats();
-    setLeads(allLeads);
-    setStats(leadsStats);
+  const refreshData = async () => {
+    try {
+      const response = await fetch('/api/leads');
+      const result = await response.json();
+      
+      if (result.leads) {
+        // Transform API leads to match our interface
+        const transformedLeads = result.leads.map((lead: any) => ({
+          ...lead,
+          priority: lead.priority || 'medium',
+          source: lead.source || 'website',
+          status: lead.status.toLowerCase(),
+          systemDetails: {
+            ...lead.systemDetails,
+            address: lead.systemDetails?.address || lead.address || 'No address'
+          },
+          tags: lead.tags || [],
+          notes: lead.notes || []
+        }));
+        
+        setLeads(transformedLeads);
+        
+        // Generate stats from real data
+        const totalValue = transformedLeads.reduce((sum: number, l: any) => sum + (l.systemDetails?.estimatedCost || 0), 0);
+        const wonLeads = transformedLeads.filter((l: any) => l.status === 'won');
+        const stats: LeadStats = {
+          total: transformedLeads.length,
+          new: transformedLeads.filter((l: any) => l.status === 'new').length,
+          contacted: transformedLeads.filter((l: any) => l.status === 'contacted').length,
+          qualified: transformedLeads.filter((l: any) => l.status === 'qualified').length,
+          quoted: transformedLeads.filter((l: any) => l.status === 'quoted').length,
+          won: wonLeads.length,
+          lost: transformedLeads.filter((l: any) => l.status === 'lost').length,
+          conversionRate: transformedLeads.length > 0 ? (wonLeads.length / transformedLeads.length) * 100 : 0,
+          averageDealSize: transformedLeads.length > 0 ? totalValue / transformedLeads.length : 0,
+          totalPipelineValue: totalValue
+        };
+        setStats(stats);
+      }
+    } catch (error) {
+      console.error('Failed to load leads:', error);
+    }
   };
 
   // Filter leads based on search and filters
@@ -99,7 +136,7 @@ const LeadsManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lead Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">CRM</h1>
           <p className="text-gray-600">Manage and track your solar installation leads</p>
         </div>
         <div className="flex gap-3">

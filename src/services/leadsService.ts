@@ -1,4 +1,4 @@
-// Lead Management Service
+// CRM Service
 // Handles lead storage, retrieval, and notifications
 
 export interface Lead {
@@ -81,22 +81,44 @@ class LeadsService {
 
   // Create new lead
   async createLead(leadData: Omit<Lead, 'id' | 'status' | 'priority' | 'source' | 'createdAt' | 'updatedAt' | 'tags' | 'notes'>): Promise<Lead> {
-    const newLead: Lead = {
-      ...leadData,
-      id: this.generateId(),
-      status: 'new',
-      priority: this.calculatePriority(leadData),
-      source: 'Solar Calculator',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      tags: this.generateTags(leadData),
-      notes: []
-    };
-
-    const leads = this.getLeads();
-    leads.unshift(newLead); // Add to beginning (most recent first)
-    
     try {
+      // Send to database API
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(leadData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to save lead');
+      }
+
+      console.log('Lead saved to database successfully:', result.leadId);
+
+      // Create lead object for local use (for notifications, etc.)
+      const newLead: Lead = {
+        ...leadData,
+        id: result.leadId,
+        status: 'new',
+        priority: this.calculatePriority(leadData),
+        source: 'Solar Calculator',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tags: this.generateTags(leadData),
+        notes: []
+      };
+
+      // Also save to localStorage as backup and for quick access
+      const leads = this.getLeads();
+      leads.unshift(newLead);
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(leads));
       
       // Update stats
