@@ -5,7 +5,10 @@ export class BuildingInsightsService {
   private baseUrl = 'https://solar.googleapis.com/v1/buildingInsights:findClosest';
 
   constructor() {
-    this.apiKey = 'AIzaSyBCI1D92F4Qn_Kpp5-CaddK9MPoCuBWbLY'; // Using existing API key
+    this.apiKey = process.env.GOOGLE_SOLAR_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_SOLAR_API_KEY || '';
+    if (!this.apiKey) {
+      console.warn('Google Solar API key not found in environment variables');
+    }
   }
 
   /**

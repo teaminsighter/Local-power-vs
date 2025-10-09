@@ -40,6 +40,33 @@ const PanelSlider = ({
 
   return (
     <div className="w-full">
+      {/* Energy Stats */}
+      <div className="mb-6">
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">Solar System Performance</h4>
+        <div className="grid grid-cols-4 gap-2">
+        <div className="bg-yellow-50 rounded-lg p-2 text-center border border-yellow-200">
+          <div className="text-xs text-yellow-800 font-medium mb-1">Energy</div>
+          <div className="text-sm font-bold text-gray-800">{panelCount * 400}</div>
+          <div className="text-xs text-gray-500">kWh/yr</div>
+        </div>
+        <div className="bg-[#156644]/5 rounded-lg p-2 text-center border border-[#156644]/20">
+          <div className="text-xs text-[#156644] font-medium mb-1">Coverage</div>
+          <div className="text-sm font-bold text-gray-800">{Math.round((panelCount * 400 / 4500) * 100)}</div>
+          <div className="text-xs text-gray-500">% home</div>
+        </div>
+        <div className="bg-blue-50 rounded-lg p-2 text-center border border-blue-200">
+          <div className="text-xs text-blue-800 font-medium mb-1">System</div>
+          <div className="text-sm font-bold text-gray-800">{(panelCount * 0.4).toFixed(1)}</div>
+          <div className="text-xs text-gray-500">kW</div>
+        </div>
+        <div className="bg-emerald-50 rounded-lg p-2 text-center border border-emerald-200">
+          <div className="text-xs text-emerald-600 font-medium mb-1">CO₂</div>
+          <div className="text-sm font-bold text-gray-800">{(panelCount * 400 * 0.295 / 1000).toFixed(1)}</div>
+          <div className="text-xs text-gray-500">t/year</div>
+        </div>
+        </div>
+      </div>
+
       {/* Panel Count Display */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold text-gray-800">Solar Panels</h3>
@@ -54,13 +81,13 @@ const PanelSlider = ({
           disabled={disabled || panelCount <= 0}
           whileHover={!disabled && panelCount > 0 ? { scale: 1.1 } : {}}
           whileTap={!disabled && panelCount > 0 ? { scale: 0.9 } : {}}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
             disabled || panelCount <= 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-primary hover:text-primary-dark'
           }`}
         >
-          <Minus size={14} />
+          <Minus size={20} strokeWidth={3} />
         </motion.button>
 
         {/* Simple Green Slider */}
@@ -74,6 +101,22 @@ const PanelSlider = ({
                 width: `${percentage}%`,
               }}
               transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+            
+            {/* Yellow Slider Handle */}
+            <motion.div
+              className="absolute w-5 h-5 bg-yellow-500 border-2 border-white rounded-full shadow-lg cursor-pointer z-20"
+              style={{
+                left: `calc(${percentage}% - 10px)`, // Subtract half width to center horizontally
+                top: '50%',
+                marginTop: '-10px', // Subtract half height to center vertically
+              }}
+              animate={{
+                left: `calc(${percentage}% - 10px)`,
+              }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
             />
             
             {/* Hidden Input */}
@@ -110,39 +153,16 @@ const PanelSlider = ({
           disabled={disabled || panelCount >= maxPanels}
           whileHover={!disabled && panelCount < maxPanels ? { scale: 1.1 } : {}}
           whileTap={!disabled && panelCount < maxPanels ? { scale: 0.9 } : {}}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
             disabled || panelCount >= maxPanels
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-orange-500 text-white hover:bg-orange-600 shadow-md'
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-primary hover:text-primary-dark'
           }`}
         >
-          <Plus size={14} />
+          <Plus size={20} strokeWidth={3} />
         </motion.button>
       </div>
 
-      {/* Energy Stats */}
-      <div className="grid grid-cols-4 gap-2 mt-4">
-        <div className="bg-yellow-50 rounded-lg p-2 text-center border border-yellow-200">
-          <div className="text-xs text-yellow-600 font-medium mb-1">Energy</div>
-          <div className="text-sm font-bold text-gray-800">{panelCount * 400}</div>
-          <div className="text-xs text-gray-500">kWh/yr</div>
-        </div>
-        <div className="bg-green-50 rounded-lg p-2 text-center border border-green-200">
-          <div className="text-xs text-green-600 font-medium mb-1">Coverage</div>
-          <div className="text-sm font-bold text-gray-800">{Math.round((panelCount * 400 / 4500) * 100)}</div>
-          <div className="text-xs text-gray-500">% home</div>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-2 text-center border border-blue-200">
-          <div className="text-xs text-blue-600 font-medium mb-1">System</div>
-          <div className="text-sm font-bold text-gray-800">{(panelCount * 0.4).toFixed(1)}</div>
-          <div className="text-xs text-gray-500">kW</div>
-        </div>
-        <div className="bg-emerald-50 rounded-lg p-2 text-center border border-emerald-200">
-          <div className="text-xs text-emerald-600 font-medium mb-1">CO₂</div>
-          <div className="text-sm font-bold text-gray-800">{(panelCount * 400 * 0.295 / 1000).toFixed(1)}</div>
-          <div className="text-xs text-gray-500">t/year</div>
-        </div>
-      </div>
     </div>
   );
 };

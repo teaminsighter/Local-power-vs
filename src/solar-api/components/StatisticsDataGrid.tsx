@@ -105,7 +105,7 @@ const StatisticsDataGrid = ({ buildingData, currentLocation, isLoading = false }
     {
       title: 'Environment Data',
       icon: Leaf,
-      color: 'bg-green-100/60 text-green-700',
+      color: 'bg-[#156644]/10 text-[#156644]',
       data: [
         { label: 'CO₂ Saved', value: `${(environmentData.co2PerYear / 1000).toFixed(1)}t/yr` },
         { label: 'Trees Equal', value: `${environmentData.treesEquivalent}` },
@@ -123,7 +123,7 @@ const StatisticsDataGrid = ({ buildingData, currentLocation, isLoading = false }
         </div>
       </div>
       
-      <div className="w-full grid grid-cols-3 gap-3" style={{ minHeight: '220px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-3" style={{ minHeight: '220px' }}>
         {dataBoxes.map((box, index) => {
           const IconComponent = box.icon;
           

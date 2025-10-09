@@ -43,11 +43,18 @@ export const loadGoogleMapsAPI = (): Promise<void> => {
       resolve();
     };
 
+    // Get API key from environment
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+    if (!apiKey) {
+      reject(new Error('Google Maps API key not found in environment variables'));
+      return;
+    }
+    
     // Create script element
     const script = document.createElement('script');
     script.async = true;
     script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBCI1D92F4Qn_Kpp5-CaddK9MPoCuBWbLY&callback=${callbackName}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=${callbackName}&libraries=places`;
     
     script.onerror = () => {
       isLoading = false;

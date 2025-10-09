@@ -14,9 +14,6 @@ export function Hero({ onOpenCalculator }: HeroProps) {
   const scrollToQuote = () => {
     document.getElementById('final-cta')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
-  const scrollToConsultation = () => {
-    document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
 
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -102,17 +99,14 @@ export function Hero({ onOpenCalculator }: HeroProps) {
             ))}
           </motion.ul>
           <motion.div className="flex flex-col sm:flex-row gap-4" variants={itemVariants}>
-              <Button onClick={scrollToQuote} size="lg" className="font-bold text-base bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg cta-button" id="hero-cta-quote">
-                  Request Free Quote
-              </Button>
-              <Button onClick={scrollToConsultation} size="lg" variant="outline" className="font-bold text-base bg-transparent border-white text-white hover:bg-white hover:text-primary shadow-lg cta-button" id="hero-cta-consultation">
-                  Book Free Consultation
-              </Button>
               {onOpenCalculator && (
-                <Button onClick={onOpenCalculator} size="lg" variant="secondary" className="font-bold text-base bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 shadow-lg cta-button" id="hero-cta-calculator">
+                <Button onClick={onOpenCalculator} size="lg" className="font-bold text-base bg-yellow-500 hover:bg-yellow-600 text-black border-0 shadow-lg cta-button" id="hero-cta-calculator">
                     Check My Savings
                 </Button>
               )}
+              <Button onClick={scrollToQuote} size="lg" className="font-bold text-base text-white shadow-lg cta-button" style={{backgroundColor: '#166b48'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#134e38'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#166b48'} id="hero-cta-quote">
+                  Request Free Quote
+              </Button>
           </motion.div>
           <motion.div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-primary-foreground/80 pt-4" variants={itemVariants} id="hero-tags">
               <span className="font-semibold">SEAI Registered</span>

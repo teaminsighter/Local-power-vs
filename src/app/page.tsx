@@ -28,12 +28,12 @@ function SimpleHeader({ onOpenCalculator }: { onOpenCalculator?: () => void }) {
           {onOpenCalculator && (
             <button 
               onClick={onOpenCalculator}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+              className="px-4 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-600"
             >
               Check My Savings
             </button>
           )}
-          <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+          <button className="px-4 py-2 text-white rounded-md" style={{backgroundColor: '#166b48'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#134e38'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#166b48'}>
             Request Free Quote
           </button>
         </nav>
@@ -41,12 +41,12 @@ function SimpleHeader({ onOpenCalculator }: { onOpenCalculator?: () => void }) {
           {onOpenCalculator && (
             <button 
               onClick={onOpenCalculator}
-              className="px-3 py-2 bg-secondary text-secondary-foreground rounded-md text-sm"
+              className="px-3 py-2 bg-yellow-500 text-black rounded-md text-sm hover:bg-yellow-600"
             >
               Calculator
             </button>
           )}
-          <button className="px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm">
+          <button className="px-3 py-2 text-white rounded-md text-sm" style={{backgroundColor: '#166b48'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#134e38'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#166b48'}>
             Quote
           </button>
         </div>

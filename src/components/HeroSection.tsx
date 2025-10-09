@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Phone, MessageCircle } from 'lucide-react';
 import FloatingCards from './FloatingCards';
 import AnimatedCounter from './AnimatedCounter';
 
@@ -10,13 +9,6 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ onGetQuoteClick }: HeroSectionProps) => {
-  const handleCallClick = () => {
-    window.open('tel:+353123456789', '_self');
-  };
-
-  const handleWhatsAppClick = () => {
-    window.open('https://wa.me/353123456789', '_blank');
-  };
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-surface via-white to-surface overflow-hidden pt-16">
@@ -112,29 +104,18 @@ const HeroSection = ({ onGetQuoteClick }: HeroSectionProps) => {
                 onClick={onGetQuoteClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 shadow-lg hover:shadow-xl flex-1 sm:flex-none"
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 shadow-lg hover:shadow-xl flex-1"
               >
-                Get Your Quote
+                Check My Savings
               </motion.button>
               
               <motion.button
-                onClick={handleCallClick}
+                onClick={onGetQuoteClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 flex items-center justify-center gap-2 flex-1 sm:flex-none"
+                className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 shadow-lg hover:shadow-xl flex-1"
               >
-                <Phone size={20} />
-                Call Us
-              </motion.button>
-
-              <motion.button
-                onClick={handleWhatsAppClick}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 flex items-center justify-center gap-2 flex-1 sm:flex-none"
-              >
-                <MessageCircle size={20} />
-                WhatsApp
+                Request Free Quote
               </motion.button>
             </motion.div>
 

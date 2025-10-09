@@ -62,21 +62,11 @@ export function Header({ onOpenCalculator }: HeaderProps) {
           <Button onClick={scrollToProcess} className="font-bold text-foreground hover:bg-accent/50 nav-link bg-transparent border-none" id="header-nav-process">
             How It Works
           </Button>
-          {onOpenCalculator && (
-            <Button onClick={onOpenCalculator} className="font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-md mr-2" id="header-calc-desktop">
-              Check My Savings
-            </Button>
-          )}
           <Button onClick={scrollToFinalCta} className="font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md cta-button" id="header-cta-desktop">
             Request Free Quote
           </Button>
         </nav>
         <div className="flex md:hidden flex-1 items-center justify-end space-x-2">
-          {onOpenCalculator && (
-            <Button onClick={onOpenCalculator} className="font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-md text-sm px-3 py-2" id="header-calc-mobile">
-              Calculator
-            </Button>
-          )}
            <Button onClick={scrollToFinalCta} className="font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md cta-button text-sm px-3 py-2" id="header-cta-mobile">
             Request Quote
           </Button>

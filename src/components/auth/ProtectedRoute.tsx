@@ -34,6 +34,16 @@ const ProtectedRoute = ({
 
   useEffect(() => {
     if (!isLoading) {
+      // Check if this is development mode and accessing via ngrok
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const isNgrokAccess = typeof window !== 'undefined' && window.location.hostname.includes('ngrok');
+      
+      // Allow bypass for ngrok in development
+      if (isDevelopment && isNgrokAccess) {
+        console.log('Development ngrok access - bypassing authentication');
+        return;
+      }
+      
       if (!isAuthenticated) {
         // Store the attempted URL to redirect after login
         sessionStorage.setItem('redirectAfterLogin', pathname);
@@ -45,6 +55,15 @@ const ProtectedRoute = ({
     }
   }, [isAuthenticated, isLoading, user, requiredRole, router, pathname, fallbackPath]);
 
+  // Check for ngrok development bypass
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isNgrokAccess = typeof window !== 'undefined' && window.location.hostname.includes('ngrok');
+  
+  // Allow bypass for ngrok in development
+  if (isDevelopment && isNgrokAccess) {
+    return <>{children}</>;
+  }
+
   // Show loading state
   if (isLoading) {
     return (
@@ -54,7 +73,7 @@ const ProtectedRoute = ({
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-2xl shadow-xl p-8 text-center"
         >
-          <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: '#146443' }} />
+          <div className="w-16 h-16 border-4 border-[#156644]/20 border-t-[#156644] rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: '#156644' }} />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Authenticating...</h3>
           <p className="text-gray-600">Please wait while we verify your access</p>
         </motion.div>

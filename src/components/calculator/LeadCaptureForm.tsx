@@ -121,16 +121,16 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
         animate={{ opacity: 1, scale: 1 }}
         className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 text-center max-w-md mx-auto"
       >
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+        <div className="w-16 h-16 bg-[#156644]/5 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-[#156644]" />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h3>
         <p className="text-gray-600 mb-6">
           We've received your information and will contact you within 24 hours with your personalized solar quote.
         </p>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <h4 className="font-medium text-green-800 mb-2">What happens next?</h4>
-          <ul className="text-sm text-green-700 space-y-1 text-left">
+        <div className="bg-[#156644]/5 border border-[#156644]/20 rounded-lg p-4 mb-6">
+          <h4 className="font-medium text-[#156644] mb-2">What happens next?</h4>
+          <ul className="text-sm text-[#156644] space-y-1 text-left">
             <li>✓ Detailed site assessment via satellite imagery</li>
             <li>✓ Custom proposal with financing options</li>
             <li>✓ Schedule free home consultation</li>
@@ -164,23 +164,23 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
       </div>
 
       {/* System Summary */}
-      <div className="bg-green-50 border-b border-green-200 px-8 py-4">
-        <h3 className="font-medium text-green-800 mb-2">Your Solar System Summary</h3>
+      <div className="bg-[#156644]/5 border-b border-[#156644]/20 px-8 py-4">
+        <h3 className="font-medium text-[#156644] mb-2">Your Solar System Summary</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <div className="text-green-600">System Size</div>
+            <div className="text-[#156644]">System Size</div>
             <div className="font-bold text-green-900">{systemDetails.systemSize.toFixed(1)} kW</div>
           </div>
           <div>
-            <div className="text-green-600">Estimated Cost</div>
+            <div className="text-[#156644]">Estimated Cost</div>
             <div className="font-bold text-green-900">€{systemDetails.estimatedCost.toLocaleString()}</div>
           </div>
           <div>
-            <div className="text-green-600">Annual Savings</div>
+            <div className="text-[#156644]">Annual Savings</div>
             <div className="font-bold text-green-900">€{systemDetails.annualSavings.toLocaleString()}</div>
           </div>
           <div>
-            <div className="text-green-600">Payback Period</div>
+            <div className="text-[#156644]">Payback Period</div>
             <div className="font-bold text-green-900">{systemDetails.paybackPeriod.toFixed(1)} years</div>
           </div>
         </div>
@@ -218,13 +218,13 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-                      errors.firstName ? 'border-red-300' : 'border-gray-300'
+                      errors.firstName ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                     placeholder="Enter your first name"
                   />
                 </div>
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-2 text-sm font-medium text-red-700 bg-red-50 px-3 py-1 rounded border border-red-200">{errors.firstName}</p>
                 )}
               </div>
 
@@ -237,12 +237,12 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   className={`block w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-                    errors.lastName ? 'border-red-300' : 'border-gray-300'
+                    errors.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Enter your last name"
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                  <p className="mt-2 text-sm font-medium text-red-700 bg-red-50 px-3 py-1 rounded border border-red-200">{errors.lastName}</p>
                 )}
               </div>
             </div>
@@ -265,13 +265,13 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-                      errors.email ? 'border-red-300' : 'border-gray-300'
+                      errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                     placeholder="your@email.com"
                   />
                 </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-2 text-sm font-medium text-red-700 bg-red-50 px-3 py-1 rounded border border-red-200">{errors.email}</p>
                 )}
               </div>
 
@@ -288,13 +288,13 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-                      errors.phone ? 'border-red-300' : 'border-gray-300'
+                      errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
                     }`}
                     placeholder="+353 123 456 789"
                   />
                 </div>
                 {errors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  <p className="mt-2 text-sm font-medium text-red-700 bg-red-50 px-3 py-1 rounded border border-red-200">{errors.phone}</p>
                 )}
               </div>
             </div>
@@ -408,7 +408,7 @@ const LeadCaptureForm = ({ systemDetails, onSubmit, onSkip }: LeadCaptureFormPro
               type="checkbox"
               checked={formData.marketingConsent}
               onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
-              className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              className="mt-1 h-4 w-4 text-[#156644] focus:ring-green-500 border-gray-300 rounded"
             />
             <label htmlFor="marketing-consent" className="text-sm text-gray-600">
               I agree to receive marketing communications about solar energy solutions and related services. 

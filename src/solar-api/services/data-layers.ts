@@ -5,7 +5,7 @@ import proj4 from 'proj4';
 
 // Google Solar API Data Layers endpoint
 const SOLAR_API_BASE_URL = 'https://solar.googleapis.com/v1/dataLayers:get';
-const API_KEY = 'AIzaSyBCI1D92F4Qn_Kpp5-CaddK9MPoCuBWbLY';
+const API_KEY = process.env.GOOGLE_SOLAR_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_SOLAR_API_KEY || '';
 
 export interface SolarDataLayersRequest {
   location: {
