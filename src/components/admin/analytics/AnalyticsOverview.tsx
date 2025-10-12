@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import DemoDataManager from '../DemoDataManager';
 
 interface AnalyticsData {
   totalLeads: number;
@@ -199,6 +200,9 @@ const AnalyticsOverview = () => {
 
   return (
     <div className="space-y-6">
+      {/* Demo Data Manager */}
+      <DemoDataManager />
+      
       {/* Header with Date Range Selector */}
       <div className="flex items-center justify-between">
         <div>

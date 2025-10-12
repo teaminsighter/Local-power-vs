@@ -346,6 +346,161 @@ const StepAnalyticsDashboard = () => {
               </table>
             </div>
           </div>
+
+          {/* Question Analysis Section */}
+          <div className="bg-blue-50 rounded-lg p-4 mt-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Question Analysis</h3>
+            <div className="space-y-6">
+              {/* State Selection Question */}
+              <div className="bg-white rounded-lg p-4 border border-blue-100">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">Step 2: State Selection</h4>
+                  <span className="text-xs text-gray-500">49 total responses</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  {[
+                    { option: 'Dublin', count: 28, percentage: 57.1, users: ['user_12345', 'user_67890', 'user_23456'] },
+                    { option: 'Cork', count: 12, percentage: 24.5, users: ['user_34567', 'user_78901'] },
+                    { option: 'Galway', count: 6, percentage: 12.2, users: ['user_45678'] },
+                    { option: 'Limerick', count: 3, percentage: 6.2, users: ['user_56789'] }
+                  ].map((choice) => (
+                    <div key={choice.option} className="bg-gray-50 rounded p-2 text-center">
+                      <div className="text-lg font-bold text-blue-600">{choice.count}</div>
+                      <div className="text-xs font-medium text-gray-900">{choice.option}</div>
+                      <div className="text-xs text-gray-500">{choice.percentage}%</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Recent User Selections:</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                    <div className="flex justify-between bg-green-50 p-2 rounded">
+                      <span>User #12345</span>
+                      <span className="font-medium text-green-700">Dublin</span>
+                    </div>
+                    <div className="flex justify-between bg-blue-50 p-2 rounded">
+                      <span>User #67890</span>
+                      <span className="font-medium text-blue-700">Dublin</span>
+                    </div>
+                    <div className="flex justify-between bg-orange-50 p-2 rounded">
+                      <span>User #34567</span>
+                      <span className="font-medium text-orange-700">Cork</span>
+                    </div>
+                    <div className="flex justify-between bg-purple-50 p-2 rounded">
+                      <span>User #78901</span>
+                      <span className="font-medium text-purple-700">Cork</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Solution Selection Question */}
+              <div className="bg-white rounded-lg p-4 border border-blue-100">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">Step 3: Solution Selection</h4>
+                  <span className="text-xs text-gray-500">55 total responses</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                  {[
+                    { option: 'Solar Panels Only', count: 32, percentage: 58.2 },
+                    { option: 'Solar + Battery', count: 18, percentage: 32.7 },
+                    { option: 'Heat Pump + Solar', count: 5, percentage: 9.1 }
+                  ].map((choice) => (
+                    <div key={choice.option} className="bg-gray-50 rounded p-2 text-center">
+                      <div className="text-lg font-bold text-green-600">{choice.count}</div>
+                      <div className="text-xs font-medium text-gray-900">{choice.option}</div>
+                      <div className="text-xs text-gray-500">{choice.percentage}%</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Recent User Selections:</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                    <div className="flex justify-between bg-green-50 p-2 rounded">
+                      <span>User #23456</span>
+                      <span className="font-medium text-green-700">Solar Panels Only</span>
+                    </div>
+                    <div className="flex justify-between bg-blue-50 p-2 rounded">
+                      <span>User #45678</span>
+                      <span className="font-medium text-blue-700">Solar + Battery</span>
+                    </div>
+                    <div className="flex justify-between bg-purple-50 p-2 rounded">
+                      <span>User #56789</span>
+                      <span className="font-medium text-purple-700">Heat Pump + Solar</span>
+                    </div>
+                    <div className="flex justify-between bg-green-50 p-2 rounded">
+                      <span>User #67812</span>
+                      <span className="font-medium text-green-700">Solar Panels Only</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Text Inputs */}
+              <div className="bg-white rounded-lg p-4 border border-blue-100">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">User Text Inputs & Feedback</h4>
+                  <span className="text-xs text-gray-500">From Steps 4-7</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="border-l-4 border-green-500 pl-3 py-2 bg-green-50">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-700">Address Input (Step 4)</span>
+                      <span className="text-xs text-gray-500">User #12345</span>
+                    </div>
+                    <p className="text-sm text-gray-900">"123 Main Street, Dublin 4, D04 ABC1"</p>
+                    <span className="text-xs text-gray-500">✓ Valid address format</span>
+                  </div>
+                  
+                  <div className="border-l-4 border-blue-500 pl-3 py-2 bg-blue-50">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-700">Energy Usage Input (Step 5)</span>
+                      <span className="text-xs text-gray-500">User #67890</span>
+                    </div>
+                    <p className="text-sm text-gray-900">"Monthly bill: €180, 4-bedroom house, electric heating"</p>
+                    <span className="text-xs text-gray-500">✓ High usage detected</span>
+                  </div>
+                  
+                  <div className="border-l-4 border-purple-500 pl-3 py-2 bg-purple-50">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-700">Custom Requirements (Step 6)</span>
+                      <span className="text-xs text-gray-500">User #34567</span>
+                    </div>
+                    <p className="text-sm text-gray-900">"Looking for panels that work well in low light conditions, have a slate roof"</p>
+                    <span className="text-xs text-gray-500">✓ Special requirements noted</span>
+                  </div>
+                  
+                  <div className="border-l-4 border-orange-500 pl-3 py-2 bg-orange-50">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-700">Contact Preferences (Step 7)</span>
+                      <span className="text-xs text-gray-500">User #78901</span>
+                    </div>
+                    <p className="text-sm text-gray-900">"Email: john.smith@email.com, Phone: +353 86 123 4567, Best time: Weekday evenings"</p>
+                    <span className="text-xs text-gray-500">✓ Complete contact info</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Question Performance Summary */}
+              <div className="bg-white rounded-lg p-4 border border-blue-100">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Question Performance Summary</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-green-50 rounded">
+                    <div className="text-lg font-bold text-green-600">87%</div>
+                    <div className="text-xs text-gray-700">Question Completion Rate</div>
+                  </div>
+                  <div className="text-center p-3 bg-blue-50 rounded">
+                    <div className="text-lg font-bold text-blue-600">2.3s</div>
+                    <div className="text-xs text-gray-700">Avg Time per Question</div>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded">
+                    <div className="text-lg font-bold text-purple-600">92%</div>
+                    <div className="text-xs text-gray-700">Valid Input Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </motion.div>
 

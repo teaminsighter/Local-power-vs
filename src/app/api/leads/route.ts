@@ -99,6 +99,47 @@ export async function GET(request: NextRequest) {
     const source = searchParams.get('source');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
+    
+    // Check if demo data should be used
+    const useDemoData = searchParams.get('demo') === 'true';
+    
+    if (useDemoData) {
+      // Fetch demo data
+      try {
+        const demoResponse = await fetch(new URL('/api/demo/admin-data', request.url));
+        const demoData = await demoResponse.json();
+        
+        if (demoData.success && demoData.data?.leads) {
+          let filteredLeads = demoData.data.leads;
+          
+          // Apply filters to demo data
+          if (status) {
+            const statusArray = status.split(',').map(s => s.trim().toLowerCase());
+            filteredLeads = filteredLeads.filter((lead: any) => 
+              statusArray.includes(lead.status.toLowerCase())
+            );
+          }
+          
+          if (source) {
+            filteredLeads = filteredLeads.filter((lead: any) => 
+              lead.source.toLowerCase().includes(source.toLowerCase())
+            );
+          }
+          
+          // Apply pagination
+          const paginatedLeads = filteredLeads.slice(offset, offset + limit);
+          
+          return NextResponse.json({
+            success: true,
+            leads: paginatedLeads,
+            total: filteredLeads.length,
+            demoData: true
+          });
+        }
+      } catch (demoError) {
+        console.error('Demo data fetch failed, falling back to database:', demoError);
+      }
+    }
 
     // Build where clause
     const where: any = {};

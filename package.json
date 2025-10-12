@@ -10,7 +10,12 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:init": "node scripts/init-database.js",
+    "demo:generate": "node scripts/generate-demo-data.js",
+    "demo:cleanup": "node scripts/cleanup-demo-data.js",
+    "demo:setup": "npm run db:init && npm run demo:generate",
+    "demo:reset": "npm run demo:cleanup && npm run demo:generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

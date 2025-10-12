@@ -87,11 +87,16 @@ EXACT ADMIN SECTIONS AND TABS (use these exact names and IDs):
    - integrations: Platform Integrations - Third-party connections
    - conversion-api: Conversion API - Server-side tracking
 
-5. **AI Insights** (ai-insights) - 4 tabs:
-   - chatbot: Chatbot Query - AI-powered queries
-   - auto-reports: Auto Reports - Automated report generation
-   - recommendations: Recommendations - AI-driven suggestions
-   - alerts: Performance Alerts - Automated monitoring
+5. **AI Assistant** (ai-insights) - 2 tabs with sub-tabs:
+   - ai-insight: AI Insight - Main AI functionality with sub-tabs:
+     * chatbot: Chatbot Query - AI-powered queries
+     * auto-reports: Auto Reports - Automated report generation
+     * recommendations: Recommendations - AI-driven suggestions
+     * alerts: Performance Alerts - Automated monitoring
+   - ai-agents: AI Agents - Automated agent management with sub-tabs:
+     * voice-agents: Voice Agents - AI-powered voice assistants
+     * marketing-agents: Marketing Agents - Automated marketing campaigns
+     * auto-replies: Auto Replies - Automated response templates
 
 6. **Integrations** (integrations) - 4 tabs:
    - google-ads: Google Ads - Campaign management

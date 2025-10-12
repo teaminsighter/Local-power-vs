@@ -353,11 +353,19 @@ const AdminTopBar = ({ activeCategory, activeTab, onTabChange, onNavigate, categ
           </div>
           
           {/* Search Shortcut Hint */}
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-md text-xs text-gray-500">
-            <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs font-medium">⌘</kbd>
-            <span>+</span>
-            <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs font-medium">K</kbd>
-            <span className="ml-1">to search</span>
+          <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-sm font-medium">⌘</kbd>
+              <span className="text-gray-400">+</span>
+              <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-sm font-medium">K</kbd>
+            </div>
+            <span className="text-gray-400">or</span>
+            <div className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-sm font-medium">Ctrl</kbd>
+              <span className="text-gray-400">+</span>
+              <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-sm font-medium">K</kbd>
+            </div>
+            <span className="ml-2 font-medium">to search</span>
           </div>
         </div>
 

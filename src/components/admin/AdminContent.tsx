@@ -23,7 +23,7 @@ const AdminContent = ({ activeCategory, activeTab, categories = adminCategories 
   const TabComponent = currentTab.component;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-full">
+    <div className="admin-panel p-6 bg-gray-50 min-h-full">
       <TabComponent />
     </div>
   );

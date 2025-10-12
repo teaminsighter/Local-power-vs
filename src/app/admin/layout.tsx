@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Insighter.Digital - Admin Panel',
-  description: 'Advanced analytics and lead management dashboard',
+  title: 'Local Power - Admin Panel',
+  description: 'Solar energy analytics and lead management dashboard',
 };
 
 export default function AdminLayout({
