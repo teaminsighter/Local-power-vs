@@ -347,160 +347,254 @@ const StepAnalyticsDashboard = () => {
             </div>
           </div>
 
-          {/* Question Analysis Section */}
-          <div className="bg-blue-50 rounded-lg p-4 mt-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Question Analysis</h3>
-            <div className="space-y-6">
-              {/* State Selection Question */}
-              <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-gray-900">Step 2: State Selection</h4>
-                  <span className="text-xs text-gray-500">49 total responses</span>
+          {/* Step 2 Question Analysis - Beautiful Design */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mt-6 border border-blue-100">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Step 2: Question Analytics</h3>
+              <div className="flex items-center gap-3">
+                <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-blue-600 border border-blue-200">
+                  182 Total Responses
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div className="bg-green-100 px-3 py-1 rounded-full text-sm font-medium text-green-700">
+                  92% Completion Rate
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              {/* Question 1: Monthly Bill Amount */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="text-lg font-semibold text-gray-900">💶 Enter your average monthly bill amount</h4>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">168 responses</span>
+                    <span className="text-sm font-medium text-green-600">Avg. Time: 12s</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
                   {[
-                    { option: 'Dublin', count: 28, percentage: 57.1, users: ['user_12345', 'user_67890', 'user_23456'] },
-                    { option: 'Cork', count: 12, percentage: 24.5, users: ['user_34567', 'user_78901'] },
-                    { option: 'Galway', count: 6, percentage: 12.2, users: ['user_45678'] },
-                    { option: 'Limerick', count: 3, percentage: 6.2, users: ['user_56789'] }
-                  ].map((choice) => (
-                    <div key={choice.option} className="bg-gray-50 rounded p-2 text-center">
-                      <div className="text-lg font-bold text-blue-600">{choice.count}</div>
-                      <div className="text-xs font-medium text-gray-900">{choice.option}</div>
-                      <div className="text-xs text-gray-500">{choice.percentage}%</div>
+                    { range: '€50-€100', count: 45, percentage: 26.8, color: 'bg-blue-500', time: '8s' },
+                    { range: '€100-€150', count: 62, percentage: 36.9, color: 'bg-green-500', time: '10s' },
+                    { range: '€150-€200', count: 38, percentage: 22.6, color: 'bg-yellow-500', time: '14s' },
+                    { range: '€200+', count: 23, percentage: 13.7, color: 'bg-red-500', time: '18s' }
+                  ].map((option) => (
+                    <div key={option.range} className="relative">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors">
+                        <div className="text-2xl font-bold text-gray-900">{option.count}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">{option.range}</div>
+                        <div className="text-xs text-gray-500 mb-2">{option.percentage}%</div>
+                        <div className="text-xs text-blue-600 font-medium">⏱️ {option.time}</div>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 ${option.color} rounded-b-lg opacity-70`}></div>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gray-200 pt-3">
-                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Recent User Selections:</h5>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                    <div className="flex justify-between bg-green-50 p-2 rounded">
-                      <span>User #12345</span>
-                      <span className="font-medium text-green-700">Dublin</span>
-                    </div>
-                    <div className="flex justify-between bg-blue-50 p-2 rounded">
-                      <span>User #67890</span>
-                      <span className="font-medium text-blue-700">Dublin</span>
-                    </div>
-                    <div className="flex justify-between bg-orange-50 p-2 rounded">
-                      <span>User #34567</span>
-                      <span className="font-medium text-orange-700">Cork</span>
-                    </div>
-                    <div className="flex justify-between bg-purple-50 p-2 rounded">
-                      <span>User #78901</span>
-                      <span className="font-medium text-purple-700">Cork</span>
-                    </div>
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <div className="text-xs text-blue-800">
+                    <strong>Insight:</strong> Most users (36.9%) have monthly bills of €100-€150. Higher bills correlate with longer decision time.
                   </div>
                 </div>
               </div>
 
-              {/* Solution Selection Question */}
-              <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-gray-900">Step 3: Solution Selection</h4>
-                  <span className="text-xs text-gray-500">55 total responses</span>
+              {/* Question 2: Home Size */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="text-lg font-semibold text-gray-900">🏠 Home size</h4>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">175 responses</span>
+                    <span className="text-sm font-medium text-green-600">Avg. Time: 6s</span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-5">
                   {[
-                    { option: 'Solar Panels Only', count: 32, percentage: 58.2 },
-                    { option: 'Solar + Battery', count: 18, percentage: 32.7 },
-                    { option: 'Heat Pump + Solar', count: 5, percentage: 9.1 }
-                  ].map((choice) => (
-                    <div key={choice.option} className="bg-gray-50 rounded p-2 text-center">
-                      <div className="text-lg font-bold text-green-600">{choice.count}</div>
-                      <div className="text-xs font-medium text-gray-900">{choice.option}</div>
-                      <div className="text-xs text-gray-500">{choice.percentage}%</div>
+                    { option: '1-2 Bedroom', count: 28, percentage: 16.0, color: 'bg-purple-500', time: '4s' },
+                    { option: '3 Bedroom', count: 67, percentage: 38.3, color: 'bg-green-500', time: '5s' },
+                    { option: '4 Bedroom', count: 52, percentage: 29.7, color: 'bg-blue-500', time: '6s' },
+                    { option: '5+ Bedroom', count: 21, percentage: 12.0, color: 'bg-orange-500', time: '7s' },
+                    { option: 'Commercial', count: 7, percentage: 4.0, color: 'bg-red-500', time: '12s' }
+                  ].map((option) => (
+                    <div key={option.option} className="relative">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors">
+                        <div className="text-xl font-bold text-gray-900">{option.count}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">{option.option}</div>
+                        <div className="text-xs text-gray-500 mb-2">{option.percentage}%</div>
+                        <div className="text-xs text-blue-600 font-medium">⏱️ {option.time}</div>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 ${option.color} rounded-b-lg opacity-70`}></div>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gray-200 pt-3">
-                  <h5 className="text-xs font-semibold text-gray-700 mb-2">Recent User Selections:</h5>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                    <div className="flex justify-between bg-green-50 p-2 rounded">
-                      <span>User #23456</span>
-                      <span className="font-medium text-green-700">Solar Panels Only</span>
-                    </div>
-                    <div className="flex justify-between bg-blue-50 p-2 rounded">
-                      <span>User #45678</span>
-                      <span className="font-medium text-blue-700">Solar + Battery</span>
-                    </div>
-                    <div className="flex justify-between bg-purple-50 p-2 rounded">
-                      <span>User #56789</span>
-                      <span className="font-medium text-purple-700">Heat Pump + Solar</span>
-                    </div>
-                    <div className="flex justify-between bg-green-50 p-2 rounded">
-                      <span>User #67812</span>
-                      <span className="font-medium text-green-700">Solar Panels Only</span>
-                    </div>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <div className="text-xs text-green-800">
+                    <strong>Insight:</strong> 3-bedroom homes dominate (38.3%). Commercial properties take 2x longer to decide.
                   </div>
                 </div>
               </div>
 
-              {/* User Text Inputs */}
-              <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-gray-900">User Text Inputs & Feedback</h4>
-                  <span className="text-xs text-gray-500">From Steps 4-7</span>
+              {/* Question 3: Select what option applies to you */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="text-lg font-semibold text-gray-900">⚡ Select what option applies to you</h4>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">171 responses</span>
+                    <span className="text-sm font-medium text-green-600">Avg. Time: 9s</span>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="border-l-4 border-green-500 pl-3 py-2 bg-green-50">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Address Input (Step 4)</span>
-                      <span className="text-xs text-gray-500">User #12345</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                  {[
+                    { option: 'Reduce electricity bills', count: 89, percentage: 52.0, color: 'bg-green-500', time: '7s' },
+                    { option: 'Environmental reasons', count: 48, percentage: 28.1, color: 'bg-blue-500', time: '9s' },
+                    { option: 'Increase property value', count: 34, percentage: 19.9, color: 'bg-purple-500', time: '12s' }
+                  ].map((option) => (
+                    <div key={option.option} className="relative">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors">
+                        <div className="text-2xl font-bold text-gray-900">{option.count}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">{option.option}</div>
+                        <div className="text-xs text-gray-500 mb-2">{option.percentage}%</div>
+                        <div className="text-xs text-blue-600 font-medium">⏱️ {option.time}</div>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 ${option.color} rounded-b-lg opacity-70`}></div>
                     </div>
-                    <p className="text-sm text-gray-900">"123 Main Street, Dublin 4, D04 ABC1"</p>
-                    <span className="text-xs text-gray-500">✓ Valid address format</span>
-                  </div>
-                  
-                  <div className="border-l-4 border-blue-500 pl-3 py-2 bg-blue-50">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Energy Usage Input (Step 5)</span>
-                      <span className="text-xs text-gray-500">User #67890</span>
-                    </div>
-                    <p className="text-sm text-gray-900">"Monthly bill: €180, 4-bedroom house, electric heating"</p>
-                    <span className="text-xs text-gray-500">✓ High usage detected</span>
-                  </div>
-                  
-                  <div className="border-l-4 border-purple-500 pl-3 py-2 bg-purple-50">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Custom Requirements (Step 6)</span>
-                      <span className="text-xs text-gray-500">User #34567</span>
-                    </div>
-                    <p className="text-sm text-gray-900">"Looking for panels that work well in low light conditions, have a slate roof"</p>
-                    <span className="text-xs text-gray-500">✓ Special requirements noted</span>
-                  </div>
-                  
-                  <div className="border-l-4 border-orange-500 pl-3 py-2 bg-orange-50">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Contact Preferences (Step 7)</span>
-                      <span className="text-xs text-gray-500">User #78901</span>
-                    </div>
-                    <p className="text-sm text-gray-900">"Email: john.smith@email.com, Phone: +353 86 123 4567, Best time: Weekday evenings"</p>
-                    <span className="text-xs text-gray-500">✓ Complete contact info</span>
+                  ))}
+                </div>
+                <div className="bg-yellow-50 rounded-lg p-3">
+                  <div className="text-xs text-yellow-800">
+                    <strong>Insight:</strong> 52% are primarily motivated by bill reduction. Property value considerations take longest to decide.
                   </div>
                 </div>
               </div>
 
-              {/* Question Performance Summary */}
-              <div className="bg-white rounded-lg p-4 border border-blue-100">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Question Performance Summary</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-green-50 rounded">
-                    <div className="text-lg font-bold text-green-600">87%</div>
-                    <div className="text-xs text-gray-700">Question Completion Rate</div>
+              {/* Question 4: When do you use most electricity? */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="text-lg font-semibold text-gray-900">🕐 When do you use most electricity?</h4>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">166 responses</span>
+                    <span className="text-sm font-medium text-green-600">Avg. Time: 8s</span>
                   </div>
-                  <div className="text-center p-3 bg-blue-50 rounded">
-                    <div className="text-lg font-bold text-blue-600">2.3s</div>
-                    <div className="text-xs text-gray-700">Avg Time per Question</div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                  {[
+                    { period: 'Morning (6-12)', count: 32, percentage: 19.3, color: 'bg-yellow-500', duration: '6s' },
+                    { period: 'Afternoon (12-18)', count: 41, percentage: 24.7, color: 'bg-orange-500', duration: '7s' },
+                    { period: 'Evening (18-24)', count: 78, percentage: 47.0, color: 'bg-purple-500', duration: '8s' },
+                    { period: 'Night (0-6)', count: 15, percentage: 9.0, color: 'bg-blue-500', duration: '11s' }
+                  ].map((option) => (
+                    <div key={option.period} className="relative">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors">
+                        <div className="text-xl font-bold text-gray-900">{option.count}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">{option.period}</div>
+                        <div className="text-xs text-gray-500 mb-2">{option.percentage}%</div>
+                        <div className="text-xs text-blue-600 font-medium">⏱️ {option.duration}</div>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 ${option.color} rounded-b-lg opacity-70`}></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-purple-50 rounded-lg p-3">
+                  <div className="text-xs text-purple-800">
+                    <strong>Insight:</strong> 47% use most electricity in the evening. Night users take longest to decide (11s vs 6-8s average).
                   </div>
-                  <div className="text-center p-3 bg-purple-50 rounded">
-                    <div className="text-lg font-bold text-purple-600">92%</div>
-                    <div className="text-xs text-gray-700">Valid Input Rate</div>
+                </div>
+              </div>
+
+              {/* Question 5: What type of home do you live in? */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="text-lg font-semibold text-gray-900">🏡 What type of home do you live in?</h4>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">173 responses</span>
+                    <span className="text-sm font-medium text-green-600">Avg. Time: 5s</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-5">
+                  {[
+                    { type: 'Detached House', count: 87, percentage: 50.3, color: 'bg-green-500', time: '4s' },
+                    { type: 'Semi-Detached', count: 43, percentage: 24.9, color: 'bg-blue-500', time: '5s' },
+                    { type: 'Terraced House', count: 28, percentage: 16.2, color: 'bg-purple-500', time: '6s' },
+                    { type: 'Apartment', count: 12, percentage: 6.9, color: 'bg-yellow-500', time: '7s' },
+                    { type: 'Bungalow', count: 3, percentage: 1.7, color: 'bg-red-500', time: '8s' }
+                  ].map((option) => (
+                    <div key={option.type} className="relative">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors">
+                        <div className="text-xl font-bold text-gray-900">{option.count}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">{option.type}</div>
+                        <div className="text-xs text-gray-500 mb-2">{option.percentage}%</div>
+                        <div className="text-xs text-blue-600 font-medium">⏱️ {option.time}</div>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 ${option.color} rounded-b-lg opacity-70`}></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <div className="text-xs text-green-800">
+                    <strong>Insight:</strong> 50.3% live in detached houses (fastest decision at 4s). Apartments/bungalows take longer due to installation complexity.
+                  </div>
+                </div>
+              </div>
+
+              {/* Question 6: Energy & Technical Information */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-5">
+                  <h4 className="text-lg font-semibold text-gray-900">🔧 Energy & Technical Information</h4>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-gray-500">159 responses</span>
+                    <span className="text-sm font-medium text-green-600">Avg. Time: 15s</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                  {[
+                    { info: 'Current Energy Usage', count: 78, percentage: 49.1, color: 'bg-blue-500', time: '12s' },
+                    { info: 'Roof Specifications', count: 54, percentage: 34.0, color: 'bg-green-500', time: '18s' },
+                    { info: 'Technical Requirements', count: 27, percentage: 16.9, color: 'bg-purple-500', time: '22s' }
+                  ].map((option) => (
+                    <div key={option.info} className="relative">
+                      <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors">
+                        <div className="text-2xl font-bold text-gray-900">{option.count}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">{option.info}</div>
+                        <div className="text-xs text-gray-500 mb-2">{option.percentage}%</div>
+                        <div className="text-xs text-blue-600 font-medium">⏱️ {option.time}</div>
+                      </div>
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 ${option.color} rounded-b-lg opacity-70`}></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-red-50 rounded-lg p-3">
+                  <div className="text-xs text-red-800">
+                    <strong>Insight:</strong> Technical requirements take 22s (longest decision time). 49% focus on current usage patterns.
+                  </div>
+                </div>
+              </div>
+
+              {/* Overall Performance Summary */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                <h4 className="text-lg font-bold text-gray-900 mb-4">📊 Question Performance Summary</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-green-600">5s</div>
+                    <div className="text-xs text-gray-700 font-medium">Fastest Question</div>
+                    <div className="text-xs text-gray-500">Home Type</div>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-red-600">15s</div>
+                    <div className="text-xs text-gray-700 font-medium">Slowest Question</div>
+                    <div className="text-xs text-gray-500">Technical Info</div>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-blue-600">94%</div>
+                    <div className="text-xs text-gray-700 font-medium">Answer Accuracy</div>
+                    <div className="text-xs text-gray-500">Valid Responses</div>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-purple-600">8.5s</div>
+                    <div className="text-xs text-gray-700 font-medium">Average Time</div>
+                    <div className="text-xs text-gray-500">Per Question</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </motion.div>
 
@@ -553,7 +647,8 @@ const StepAnalyticsDashboard = () => {
           <h3 className="text-lg font-bold text-gray-900 mb-4">Device Breakdown</h3>
           <div className="space-y-4">
             {Object.entries(sessionStats.deviceBreakdown || {}).map(([device, count]) => {
-              const total = Object.values(sessionStats.deviceBreakdown || {}).reduce((a: number, b: number) => a + b, 0);
+              const deviceBreakdown = sessionStats.deviceBreakdown || {};
+              const total = Object.values(deviceBreakdown).reduce((a: number, b: unknown) => a + (b as number), 0);
               const percentage = total > 0 ? ((count as number) / total) * 100 : 0;
               
               const getDeviceIcon = () => {

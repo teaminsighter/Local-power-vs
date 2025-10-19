@@ -219,52 +219,6 @@ export function ProductDetails() {
         transition={{ duration: 0.6 }}
     >
         <div className="container px-4 md:px-6">
-            <div className="text-center space-y-4 mb-12">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Premium, German-Engineered Technology</h2>
-                <p className="mx-auto max-w-3xl text-muted-foreground md:text-xl/relaxed">
-                    Explore the technical excellence of SOLARWATT components, designed for maximum efficiency, durability, and safety, all backed by industry-leading warranties.
-                </p>
-            </div>
-            
-            {/* Hero Gallery Section */}
-            <motion.div
-                className="mb-16 relative"
-                id="product-gallery"
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-            >
-                <div className="overflow-hidden relative rounded-xl shadow-2xl mx-auto aspect-video">
-                    <AnimatePresence initial={false} mode="wait">
-                         <motion.div
-                            key={currentSlide}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="w-full h-full"
-                        >
-                            {currentSlideData.type === 'image' && 'url' in currentSlideData && (
-                                <Image
-                                    src={currentSlideData.url}
-                                    alt={currentSlideData.alt}
-                                    width={currentSlideData.width}
-                                    height={currentSlideData.height}
-                                    className="w-full h-full object-cover"
-                                    priority={currentSlide === 0}
-                                />
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-                <button onClick={prevSlide} className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10 carousel-button" id="gallery-prev">
-                    <ChevronLeft size={24} />
-                </button>
-                <button onClick={nextSlide} className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10 carousel-button" id="gallery-next">
-                    <ChevronRight size={28} />
-                </button>
-            </motion.div>
 
             {/* Parallax Sticky Navigation Section */}
             <div 

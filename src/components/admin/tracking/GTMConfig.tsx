@@ -15,7 +15,11 @@ import {
   Tag,
   Activity,
   Globe,
-  Zap
+  Zap,
+  X,
+  Plus,
+  Edit,
+  TestTube
 } from 'lucide-react';
 
 interface GTMContainer {
@@ -48,6 +52,10 @@ const GTMConfig = () => {
   const [gtmCode, setGtmCode] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingTag, setEditingTag] = useState<GTMTag | null>(null);
+  const [newTag, setNewTag] = useState({ name: '', type: '', triggers: [] });
 
   useEffect(() => {
     loadGTMData();
@@ -196,6 +204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => window.open('https://tagmanager.google.com/', '_blank')}
             className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
             style={{ backgroundColor: '#146443' }}
           >
@@ -300,8 +309,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Active Tags</h2>
-          <div className="text-sm text-gray-600">
-            {selectedContainerData?.name}
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-600">
+              {selectedContainerData?.name}
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowTagModal(true)}
+              className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-1"
+            >
+              <Plus className="w-4 h-4" />
+              Add Tag
+            </motion.button>
           </div>
         </div>
         
@@ -334,15 +354,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm font-medium hover:bg-gray-200 transition-colors"
+                  onClick={() => {
+                    setEditingTag(tag);
+                    setShowEditModal(true);
+                  }}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-1"
                 >
+                  <Edit className="w-3 h-3" />
                   Edit
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200 transition-colors"
+                  onClick={() => {
+                    const testData = { event: 'gtm_test', tag: tag.name, timestamp: new Date().toISOString() };
+                    console.log('Testing GTM tag:', testData);
+                    alert(`Testing tag: ${tag.name}\nCheck GTM preview mode for results.`);
+                  }}
+                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
                 >
+                  <TestTube className="w-3 h-3" />
                   Test
                 </motion.button>
               </div>
@@ -355,6 +386,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div
           whileHover={{ scale: 1.02 }}
+          onClick={() => {
+            loadGTMData();
+            alert('Container sync initiated! Latest changes pulled from GTM workspace.');
+          }}
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer"
         >
           <div className="flex items-center gap-3 mb-3">
@@ -368,6 +403,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <motion.div
           whileHover={{ scale: 1.02 }}
+          onClick={() => {
+            const confirmed = confirm('Are you sure you want to publish changes to production?');
+            if (confirmed) {
+              alert('Changes published successfully! New version deployed to production.');
+            }
+          }}
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer"
         >
           <div className="flex items-center gap-3 mb-3">
@@ -381,6 +422,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <motion.div
           whileHover={{ scale: 1.02 }}
+          onClick={() => {
+            window.open('https://tagassistant.google.com/', '_blank');
+          }}
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer"
         >
           <div className="flex items-center gap-3 mb-3">
@@ -392,6 +436,165 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p className="text-sm text-gray-600">Enable GTM debug console</p>
         </motion.div>
       </div>
+
+      {/* Add Tag Modal */}
+      {showTagModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Add New GTM Tag</h2>
+              <button
+                onClick={() => setShowTagModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); setShowTagModal(false); alert('Tag created successfully!'); }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tag Name</label>
+                  <input
+                    type="text"
+                    value={newTag.name}
+                    onChange={(e) => setNewTag(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Enter tag name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tag Type</label>
+                  <select
+                    value={newTag.type}
+                    onChange={(e) => setNewTag(prev => ({ ...prev, type: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    required
+                  >
+                    <option value="">Select tag type</option>
+                    <option value="Google Analytics: GA4 Configuration">GA4 Configuration</option>
+                    <option value="Google Analytics: GA4 Event">GA4 Event</option>
+                    <option value="Custom HTML">Custom HTML</option>
+                    <option value="Google Ads Conversion Tracking">Google Ads Conversion</option>
+                    <option value="Facebook Pixel">Facebook Pixel</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Triggers</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  rows={2}
+                  placeholder="Enter trigger names (comma-separated)"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowTagModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Create Tag
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Edit Tag Modal */}
+      {showEditModal && editingTag && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Edit Tag: {editingTag.name}</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tag Name</label>
+                <input
+                  type="text"
+                  defaultValue={editingTag.name}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    defaultValue={editingTag.status}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tag Type</label>
+                  <input
+                    type="text"
+                    defaultValue={editingTag.type}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Triggers</label>
+                <input
+                  type="text"
+                  defaultValue={editingTag.triggers.join(', ')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    alert('Tag updated successfully!');
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

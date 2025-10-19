@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, TrendingUp, MousePointer, DollarSign, Eye, Target, Calendar, Settings, Play, Pause } from 'lucide-react';
+import { Search, TrendingUp, MousePointer, DollarSign, Eye, Target, Calendar, Settings, Play, Pause, X, Plus } from 'lucide-react';
 
 const GoogleCampaigns = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
-
-  const campaigns = [
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState<any>(null);
+  const [campaigns, setCampaigns] = useState([
     {
       id: 'google-solar-search',
       name: 'Solar Panel Installation - Dublin',
@@ -56,7 +59,17 @@ const GoogleCampaigns = () => {
       costPerConversion: 35.30,
       keywords: 45
     }
-  ];
+  ]);
+
+  const handleToggleCampaign = (campaignId: string) => {
+    setCampaigns(prev => prev.map(campaign => {
+      if (campaign.id === campaignId) {
+        const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+        return { ...campaign, status: newStatus };
+      }
+      return campaign;
+    }));
+  };
 
   const getCampaignTypeColor = (type: string) => {
     switch (type) {
@@ -90,14 +103,24 @@ const GoogleCampaigns = () => {
           </div>
         </div>
         
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Target className="w-4 h-4" />
-          Create Campaign
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSettingsModal(true)}
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            title="Google Ads Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Target className="w-4 h-4" />
+            Create Campaign
+          </motion.button>
+        </div>
       </div>
 
       {/* Performance Overview */}
@@ -257,7 +280,13 @@ const GoogleCampaigns = () => {
                     {campaign.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </button>
                   
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <button 
+                    onClick={() => {
+                      setEditingCampaign(campaign);
+                      setShowEditModal(true);
+                    }}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
                     <Settings className="w-4 h-4" />
                   </button>
                 </div>
@@ -310,6 +339,255 @@ const GoogleCampaigns = () => {
           ))}
         </div>
       </motion.div>
+
+      {/* Create Campaign Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Create Google Ads Campaign</h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter campaign name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Type</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="search">Search</option>
+                    <option value="display">Display</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="video">Video</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Daily Budget (€)</label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bidding Strategy</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="cpc">Manual CPC</option>
+                    <option value="cpa">Target CPA</option>
+                    <option value="roas">Target ROAS</option>
+                    <option value="maximize-clicks">Maximize Clicks</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                  <input
+                    type="date"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Keywords (comma-separated)</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                  placeholder="solar panels, renewable energy, solar installation"
+                ></textarea>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Create Campaign
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Edit Campaign Modal */}
+      {showEditModal && editingCampaign && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Edit Campaign: {editingCampaign.name}</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                  <input
+                    type="text"
+                    defaultValue={editingCampaign.name}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    defaultValue={editingCampaign.status}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Daily Budget (€)</label>
+                  <input
+                    type="number"
+                    defaultValue={editingCampaign.budget}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Type</label>
+                  <input
+                    type="text"
+                    defaultValue={editingCampaign.type}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-lg mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Google Ads Settings</h2>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Google Ads Account ID</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="123-456-7890"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Default Time Zone</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="GMT">GMT (Dublin)</option>
+                  <option value="EST">EST (New York)</option>
+                  <option value="PST">PST (Los Angeles)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="EUR">EUR (€)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="GBP">GBP (£)</option>
+                </select>
+              </div>
+              <div className="flex items-center">
+                <input type="checkbox" id="auto-tagging" className="mr-2" />
+                <label htmlFor="auto-tagging" className="text-sm text-gray-700">Enable auto-tagging</label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-6">
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Save Settings
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

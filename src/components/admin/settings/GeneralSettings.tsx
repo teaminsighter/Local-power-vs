@@ -60,10 +60,6 @@ interface GeneralSettings {
   // Navigation Appearance
   navigationBackground?: string;
   navigationTextColor?: string;
-  navigationActiveBackground?: string;
-  navigationActiveTextColor?: string;
-  navigationHoverBackground?: string;
-  navigationBorderColor?: string;
   
   // Button Appearance
   primaryButtonBackground?: string;
@@ -103,6 +99,8 @@ interface GeneralSettings {
   pushNotifications: boolean;
   smsNotifications: boolean;
   notificationSound: boolean;
+  systemAlerts: boolean;
+  marketingEmails: boolean;
   
   // Privacy & Security
   twoFactorRequired: boolean;
@@ -130,6 +128,13 @@ const GeneralSettings = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [companyChanges, setCompanyChanges] = useState(false);
+  const [localizationChanges, setLocalizationChanges] = useState(false);
+  const [appearanceChanges, setAppearanceChanges] = useState(false);
+  const [systemChanges, setSystemChanges] = useState(false);
+  const [notificationChanges, setNotificationChanges] = useState(false);
+  const [savingSection, setSavingSection] = useState<string>('');
+  const [sectionSuccess, setSectionSuccess] = useState<string>('');
 
   useEffect(() => {
     loadSettings();
@@ -168,10 +173,6 @@ const GeneralSettings = () => {
       // Navigation Appearance
       navigationBackground: '#146443',
       navigationTextColor: '#ffffff',
-      navigationActiveBackground: '#1a7f5a',
-      navigationActiveTextColor: '#ffffff',
-      navigationHoverBackground: '#0f5537',
-      navigationBorderColor: '#0f4630',
       
       // Button Appearance
       primaryButtonBackground: '#146443',
@@ -211,6 +212,8 @@ const GeneralSettings = () => {
       pushNotifications: true,
       smsNotifications: false,
       notificationSound: true,
+      systemAlerts: true,
+      marketingEmails: false,
       
       // Privacy & Security
       twoFactorRequired: false,
@@ -252,9 +255,69 @@ const GeneralSettings = () => {
       setTimeout(() => {
         if (finalSettings !== mockSettings) {
           applyCSSVariablesFromSettings(finalSettings);
+          createDynamicThemeStyles(finalSettings);
         }
       }, 100);
     }, 1000);
+  };
+
+  const createDynamicThemeStyles = (settings: GeneralSettings) => {
+    // Create or update dynamic theme override styles
+    let dynamicStyle = document.getElementById('dynamic-admin-theme');
+    if (!dynamicStyle) {
+      dynamicStyle = document.createElement('style');
+      dynamicStyle.id = 'dynamic-admin-theme';
+      document.head.appendChild(dynamicStyle);
+    }
+    
+    // Generate CSS that overrides the theme with higher specificity
+    let css = `
+      /* Dynamic theme overrides with highest priority */
+      .admin-sidebar,
+      .admin-sidebar.admin-sidebar {
+        background-color: ${settings.navigationBackground || '#146443'} !important;
+        color: ${settings.navigationTextColor || '#ffffff'} !important;
+      }
+      
+      .admin-sidebar h1,
+      .admin-sidebar p,
+      .admin-sidebar span,
+      .admin-sidebar button:not([class*="bg-"]) {
+        color: ${settings.navigationTextColor || '#ffffff'} !important;
+      }
+      
+      
+      button[style*="background-color: #146443"],
+      button[style*="backgroundColor: #146443"] {
+        background-color: ${settings.primaryButtonBackground || '#146443'} !important;
+        color: ${settings.primaryButtonTextColor || '#ffffff'} !important;
+      }
+      
+      .admin-panel h1, .admin-panel h2, .admin-panel h3, 
+      .admin-panel h4, .admin-panel h5, .admin-panel h6,
+      .admin-panel .text-gray-900 {
+        color: ${settings.titleColor || '#111827'} !important;
+      }
+      
+      .admin-panel .text-gray-600 {
+        color: ${settings.subtitleColor || '#6b7280'} !important;
+      }
+      
+      .admin-panel .bg-white {
+        background-color: ${settings.surfaceColor || '#ffffff'} !important;
+      }
+      
+      .admin-panel .border-gray-200,
+      .admin-panel .border-gray-300 {
+        border-color: ${settings.borderColor || '#e5e7eb'} !important;
+      }
+      
+      body {
+        background-color: ${settings.backgroundColor || '#f9fafb'} !important;
+      }
+    `;
+    
+    dynamicStyle.textContent = css;
   };
 
   const applyCSSVariablesFromSettings = (settings: GeneralSettings) => {
@@ -265,15 +328,6 @@ const GeneralSettings = () => {
     }
     if (settings.navigationTextColor) {
       root.style.setProperty('--admin-nav-text', settings.navigationTextColor);
-    }
-    if (settings.navigationActiveBackground) {
-      root.style.setProperty('--admin-nav-active-bg', settings.navigationActiveBackground);
-    }
-    if (settings.navigationActiveTextColor) {
-      root.style.setProperty('--admin-nav-active-text', settings.navigationActiveTextColor);
-    }
-    if (settings.navigationHoverBackground) {
-      root.style.setProperty('--admin-nav-hover-bg', settings.navigationHoverBackground);
     }
     if (settings.primaryButtonBackground) {
       root.style.setProperty('--admin-btn-primary-bg', settings.primaryButtonBackground);
@@ -347,9 +401,21 @@ const GeneralSettings = () => {
       setSettings(newSettings);
       setHasChanges(true);
       
-      // Apply changes immediately for appearance settings
-      if (key.includes('Color') || key.includes('Background') || key === 'customCss' || key === 'theme' || key === 'compactMode') {
+      // Set section-specific change flags
+      if (['companyName', 'companyEmail', 'companyPhone', 'companyAddress', 'companyWebsite', 'companyLogo'].includes(key)) {
+        setCompanyChanges(true);
+      } else if (['language', 'timezone', 'dateFormat', 'timeFormat', 'currency', 'numberFormat'].includes(key)) {
+        setLocalizationChanges(true);
+      } else if (key.includes('Color') || key.includes('Background') || key === 'customCss' || key === 'theme' || key === 'compactMode' || key === 'primaryColor' || key === 'logoPosition') {
+        setAppearanceChanges(true);
+        // Apply changes immediately for appearance settings
         applySettingImmediately(key, value);
+        // Update the dynamic theme styles
+        createDynamicThemeStyles(newSettings);
+      } else if (['autoSave', 'autoBackup', 'sessionTimeout', 'maxLoginAttempts', 'passwordExpiry'].includes(key)) {
+        setSystemChanges(true);
+      } else if (['emailNotifications', 'smsNotifications', 'pushNotifications', 'notificationSound', 'systemAlerts', 'marketingEmails'].includes(key)) {
+        setNotificationChanges(true);
       }
     }
   };
@@ -360,24 +426,41 @@ const GeneralSettings = () => {
     switch (key) {
       case 'navigationBackground':
         root.style.setProperty('--admin-nav-bg', value);
+        // Force immediate visual update
+        const sidebar = document.querySelector('.admin-sidebar');
+        if (sidebar) {
+          (sidebar as HTMLElement).style.setProperty('background-color', value, 'important');
+        }
         break;
       case 'navigationTextColor':
         root.style.setProperty('--admin-nav-text', value);
-        break;
-      case 'navigationActiveBackground':
-        root.style.setProperty('--admin-nav-active-bg', value);
-        break;
-      case 'navigationActiveTextColor':
-        root.style.setProperty('--admin-nav-active-text', value);
-        break;
-      case 'navigationHoverBackground':
-        root.style.setProperty('--admin-nav-hover-bg', value);
+        // Force immediate visual update to all sidebar text
+        const sidebarElements = document.querySelectorAll('.admin-sidebar, .admin-sidebar h1, .admin-sidebar p, .admin-sidebar button, .admin-sidebar span');
+        sidebarElements.forEach(el => {
+          if (el instanceof HTMLElement) {
+            el.style.setProperty('color', value, 'important');
+          }
+        });
         break;
       case 'primaryButtonBackground':
         root.style.setProperty('--admin-btn-primary-bg', value);
+        // Update all primary buttons immediately
+        const primaryButtons = document.querySelectorAll('button[style*="background-color: #146443"], button[style*="backgroundColor: #146443"], .btn-primary');
+        primaryButtons.forEach(btn => {
+          if (btn instanceof HTMLElement) {
+            btn.style.setProperty('background-color', value, 'important');
+          }
+        });
         break;
       case 'primaryButtonTextColor':
         root.style.setProperty('--admin-btn-primary-text', value);
+        // Update all primary button text immediately
+        const primaryButtonTexts = document.querySelectorAll('button[style*="background-color: #146443"], button[style*="backgroundColor: #146443"], .btn-primary');
+        primaryButtonTexts.forEach(btn => {
+          if (btn instanceof HTMLElement) {
+            btn.style.setProperty('color', value, 'important');
+          }
+        });
         break;
       case 'primaryButtonHoverBackground':
         root.style.setProperty('--admin-btn-primary-hover', value);
@@ -393,18 +476,51 @@ const GeneralSettings = () => {
         break;
       case 'backgroundColor':
         root.style.setProperty('--admin-bg', value);
+        // Update page background immediately
+        const body = document.body;
+        if (body) {
+          body.style.setProperty('background-color', value, 'important');
+        }
         break;
       case 'titleColor':
         root.style.setProperty('--admin-title', value);
+        // Update all titles immediately
+        const titles = document.querySelectorAll('h1, h2, h3, h4, h5, h6, .admin-title, .text-gray-900');
+        titles.forEach(title => {
+          if (title instanceof HTMLElement) {
+            title.style.setProperty('color', value, 'important');
+          }
+        });
         break;
       case 'subtitleColor':
         root.style.setProperty('--admin-subtitle', value);
+        // Update all subtitles immediately
+        const subtitles = document.querySelectorAll('.text-gray-600, .admin-subtitle');
+        subtitles.forEach(subtitle => {
+          if (subtitle instanceof HTMLElement) {
+            subtitle.style.setProperty('color', value, 'important');
+          }
+        });
         break;
       case 'surfaceColor':
         root.style.setProperty('--admin-surface', value);
+        // Update all white surfaces immediately
+        const surfaces = document.querySelectorAll('.bg-white, .admin-surface');
+        surfaces.forEach(surface => {
+          if (surface instanceof HTMLElement) {
+            surface.style.setProperty('background-color', value, 'important');
+          }
+        });
         break;
       case 'borderColor':
         root.style.setProperty('--admin-border', value);
+        // Update all borders immediately
+        const borders = document.querySelectorAll('.border-gray-200, .border-gray-300, .admin-border');
+        borders.forEach(border => {
+          if (border instanceof HTMLElement) {
+            border.style.setProperty('border-color', value, 'important');
+          }
+        });
         break;
       case 'successColor':
         root.style.setProperty('--admin-success', value);
@@ -450,6 +566,8 @@ const GeneralSettings = () => {
     try {
       // Apply CSS variables immediately
       applyCSSVariables();
+      createDynamicThemeStyles(settings!);
+      applyCSSVariablesFromSettings(settings!);
       
       // Save to localStorage
       localStorage.setItem('admin-general-settings', JSON.stringify(settings));
@@ -465,6 +583,11 @@ const GeneralSettings = () => {
         setIsSaving(false);
         setSaveSuccess(true);
         setHasChanges(false);
+        setCompanyChanges(false);
+        setLocalizationChanges(false);
+        setAppearanceChanges(false);
+        setSystemChanges(false);
+        setNotificationChanges(false);
         
         setTimeout(() => setSaveSuccess(false), 3000);
       }, 1500);
@@ -474,26 +597,86 @@ const GeneralSettings = () => {
     }
   };
 
+  const saveSectionSettings = async (section: string) => {
+    setSavingSection(section);
+    
+    try {
+      // Apply CSS variables immediately for appearance changes
+      if (section === 'appearance') {
+        applyCSSVariables();
+        createDynamicThemeStyles(settings!);
+        applyCSSVariablesFromSettings(settings!);
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('admin-general-settings', JSON.stringify(settings));
+      
+      // In production, this would make an API call
+      // await fetch('/api/admin/settings/general', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(settings)
+      // });
+      
+      setTimeout(() => {
+        setSavingSection('');
+        setSectionSuccess(section);
+        
+        // Clear section-specific change flags
+        switch (section) {
+          case 'company':
+            setCompanyChanges(false);
+            break;
+          case 'localization':
+            setLocalizationChanges(false);
+            break;
+          case 'appearance':
+            setAppearanceChanges(false);
+            break;
+          case 'system':
+            setSystemChanges(false);
+            break;
+          case 'notifications':
+            setNotificationChanges(false);
+            break;
+        }
+        
+        // Check if all changes are saved
+        if (!companyChanges && !localizationChanges && !appearanceChanges && !systemChanges && !notificationChanges) {
+          setHasChanges(false);
+        }
+        
+        setTimeout(() => setSectionSuccess(''), 3000);
+      }, 1500);
+    } catch (error) {
+      console.error('Error saving section settings:', error);
+      setSavingSection('');
+    }
+  };
+
   const applyCSSVariables = () => {
     if (!settings) return;
     
     const root = document.documentElement;
     
-    // Apply navigation styles
+    // Apply navigation styles with priority
     if (settings.navigationBackground) {
       root.style.setProperty('--admin-nav-bg', settings.navigationBackground);
+      // Force immediate application to sidebar
+      const sidebar = document.querySelector('.admin-sidebar');
+      if (sidebar) {
+        (sidebar as HTMLElement).style.setProperty('background-color', settings.navigationBackground, 'important');
+      }
     }
     if (settings.navigationTextColor) {
       root.style.setProperty('--admin-nav-text', settings.navigationTextColor);
-    }
-    if (settings.navigationActiveBackground) {
-      root.style.setProperty('--admin-nav-active-bg', settings.navigationActiveBackground);
-    }
-    if (settings.navigationActiveTextColor) {
-      root.style.setProperty('--admin-nav-active-text', settings.navigationActiveTextColor);
-    }
-    if (settings.navigationHoverBackground) {
-      root.style.setProperty('--admin-nav-hover-bg', settings.navigationHoverBackground);
+      // Force application to sidebar text elements
+      const sidebarTexts = document.querySelectorAll('.admin-sidebar, .admin-sidebar *');
+      sidebarTexts.forEach(el => {
+        if (el instanceof HTMLElement && !el.matches('svg')) {
+          el.style.setProperty('color', settings.navigationTextColor!, 'important');
+        }
+      });
     }
     
     // Apply button styles
@@ -570,6 +753,9 @@ const GeneralSettings = () => {
     } else {
       document.documentElement.classList.remove('compact');
     }
+    
+    // Apply dynamic theme styles to override everything with highest priority
+    createDynamicThemeStyles(settings);
   };
 
   const resetSettings = () => {
@@ -697,9 +883,38 @@ const GeneralSettings = () => {
 
       {/* Company Information */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Building className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Company Information</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Building className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Company Information</h2>
+          </div>
+          {companyChanges && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => saveSectionSettings('company')}
+              disabled={savingSection === 'company'}
+              className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ backgroundColor: '#146443' }}
+            >
+              {savingSection === 'company' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : sectionSuccess === 'company' ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Company Info
+                </>
+              )}
+            </motion.button>
+          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -757,9 +972,38 @@ const GeneralSettings = () => {
 
       {/* Localization Settings */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Globe className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Localization & Regional Settings</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Globe className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Localization & Regional Settings</h2>
+          </div>
+          {localizationChanges && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => saveSectionSettings('localization')}
+              disabled={savingSection === 'localization'}
+              className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ backgroundColor: '#146443' }}
+            >
+              {savingSection === 'localization' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : sectionSuccess === 'localization' ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Localization
+                </>
+              )}
+            </motion.button>
+          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -852,9 +1096,38 @@ const GeneralSettings = () => {
 
       {/* Appearance Settings */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Palette className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Appearance & Interface</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Appearance & Interface</h2>
+          </div>
+          {appearanceChanges && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => saveSectionSettings('appearance')}
+              disabled={savingSection === 'appearance'}
+              className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ backgroundColor: '#146443' }}
+            >
+              {savingSection === 'appearance' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : sectionSuccess === 'appearance' ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Appearance
+                </>
+              )}
+            </motion.button>
+          )}
         </div>
         
         {/* Navigation Appearance */}
@@ -897,23 +1170,6 @@ const GeneralSettings = () => {
               </div>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Active Item Background</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={settings.navigationActiveBackground || '#1a7f5a'}
-                  onChange={(e) => updateSetting('navigationActiveBackground', e.target.value)}
-                  className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={settings.navigationActiveBackground || '#1a7f5a'}
-                  onChange={(e) => updateSetting('navigationActiveBackground', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
-                />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1128,9 +1384,38 @@ const GeneralSettings = () => {
 
       {/* System Preferences */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Settings className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">System Preferences</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Settings className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">System Preferences</h2>
+          </div>
+          {systemChanges && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => saveSectionSettings('system')}
+              disabled={savingSection === 'system'}
+              className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ backgroundColor: '#146443' }}
+            >
+              {savingSection === 'system' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : sectionSuccess === 'system' ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save System Prefs
+                </>
+              )}
+            </motion.button>
+          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1215,9 +1500,38 @@ const GeneralSettings = () => {
 
       {/* Notification Settings */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Bell className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Notification Preferences</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Notification Preferences</h2>
+          </div>
+          {notificationChanges && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => saveSectionSettings('notifications')}
+              disabled={savingSection === 'notifications'}
+              className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ backgroundColor: '#146443' }}
+            >
+              {savingSection === 'notifications' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : sectionSuccess === 'notifications' ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Saved!
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Notifications
+                </>
+              )}
+            </motion.button>
+          )}
         </div>
         
         <div className="space-y-4">
@@ -1272,6 +1586,32 @@ const GeneralSettings = () => {
               className="rounded border-gray-300 text-green-600 focus:ring-green-500"
             />
           </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700">System Alerts</label>
+              <p className="text-xs text-gray-500">Receive alerts for system events</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.systemAlerts}
+              onChange={(e) => updateSetting('systemAlerts', e.target.checked)}
+              className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Marketing Emails</label>
+              <p className="text-xs text-gray-500">Receive promotional and marketing emails</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.marketingEmails}
+              onChange={(e) => updateSetting('marketingEmails', e.target.checked)}
+              className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+            />
+          </div>
         </div>
       </div>
 
@@ -1303,8 +1643,8 @@ const GeneralSettings = () => {
                   <div 
                     className="px-3 py-2 rounded flex items-center gap-2"
                     style={{ 
-                      backgroundColor: settings?.navigationActiveBackground || '#1a7f5a',
-                      color: settings?.navigationActiveTextColor || '#ffffff'
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      color: '#ffffff'
                     }}
                   >
                     <div className="w-4 h-4 bg-current opacity-60 rounded"></div>

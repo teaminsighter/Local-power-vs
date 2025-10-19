@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { adminCategories, AdminCategory } from './AdminDashboard';
+import { adminCategories, AdminCategory } from './AdminDashboard';  
 
 interface AdminSidebarProps {
   activeCategory: string;
@@ -34,18 +34,19 @@ const AdminSidebar = ({
             // Apply navigation theme variables
             if (settings.navigationBackground) {
               root.style.setProperty('--admin-nav-bg', settings.navigationBackground);
+              // Force update sidebar background immediately
+              const sidebar = document.querySelector('.admin-sidebar') as HTMLElement;
+              if (sidebar) {
+                sidebar.style.backgroundColor = settings.navigationBackground;
+              }
             }
             if (settings.navigationTextColor) {
               root.style.setProperty('--admin-nav-text', settings.navigationTextColor);
-            }
-            if (settings.navigationActiveBackground) {
-              root.style.setProperty('--admin-nav-active-bg', settings.navigationActiveBackground);
-            }
-            if (settings.navigationActiveTextColor) {
-              root.style.setProperty('--admin-nav-active-text', settings.navigationActiveTextColor);
-            }
-            if (settings.navigationHoverBackground) {
-              root.style.setProperty('--admin-nav-hover-bg', settings.navigationHoverBackground);
+              // Force update sidebar text color immediately
+              const sidebar = document.querySelector('.admin-sidebar') as HTMLElement;
+              if (sidebar) {
+                sidebar.style.color = settings.navigationTextColor;
+              }
             }
             
             // Apply other theme variables
@@ -119,12 +120,38 @@ const AdminSidebar = ({
     };
   }, []);
 
+  // Additional effect to ensure sidebar colors are applied after component mounts
+  useEffect(() => {
+    const sidebar = document.querySelector('.admin-sidebar') as HTMLElement;
+    if (sidebar) {
+      // Set default colors
+      sidebar.style.backgroundColor = '#146443';
+      sidebar.style.color = '#ffffff';
+      
+      // Load and apply saved colors if they exist
+      const savedSettings = localStorage.getItem('admin-general-settings');
+      if (savedSettings) {
+        try {
+          const settings = JSON.parse(savedSettings);
+          if (settings.navigationBackground) {
+            sidebar.style.backgroundColor = settings.navigationBackground;
+          }
+          if (settings.navigationTextColor) {
+            sidebar.style.color = settings.navigationTextColor;
+          }
+        } catch (error) {
+          console.error('Error applying sidebar colors:', error);
+        }
+      }
+    }
+  }, []);
+
   return (
     <motion.div
       className="text-white flex flex-col shadow-xl admin-sidebar"
       style={{ 
-        backgroundColor: 'var(--admin-nav-bg, #146443)',
-        color: 'var(--admin-nav-text, #ffffff)'
+        backgroundColor: '#146443',
+        color: '#ffffff'
       }}
       animate={{ width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -186,26 +213,17 @@ const AdminSidebar = ({
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
               className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 shadow-lg"
-              style={activeCategory === category.id ? 
-                { 
-                  backgroundColor: 'var(--admin-nav-active-bg, rgba(255, 255, 255, 0.2))',
-                  color: 'var(--admin-nav-active-text, #ffffff)'
-                } : 
-                {
-                  color: 'var(--admin-nav-text, rgba(255,255,255,0.8))'
-                }
-              }
+              style={{
+                backgroundColor: 'transparent',
+                color: '#ffffff'
+              }}
               onMouseEnter={(e) => {
-                if (activeCategory !== category.id) {
-                  e.currentTarget.style.backgroundColor = 'var(--admin-nav-hover-bg, rgba(255, 255, 255, 0.1))';
-                  e.currentTarget.style.color = 'var(--admin-nav-text, #ffffff)';
-                }
+                e.currentTarget.style.setProperty('background-color', 'rgba(255, 255, 255, 0.1)', 'important');
+                e.currentTarget.style.setProperty('color', '#ffffff', 'important');
               }}
               onMouseLeave={(e) => {
-                if (activeCategory !== category.id) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--admin-nav-text, rgba(255,255,255,0.8))';
-                }
+                e.currentTarget.style.setProperty('background-color', 'transparent', 'important');
+                e.currentTarget.style.setProperty('color', '#ffffff', 'important');
               }}
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
@@ -216,9 +234,7 @@ const AdminSidebar = ({
               <div 
                 className="flex-shrink-0"
                 style={{
-                  color: activeCategory === category.id 
-                    ? 'var(--admin-nav-active-text, #ffffff)' 
-                    : 'var(--admin-nav-text, rgba(255,255,255,0.6))'
+                  color: '#ffffff'
                 }}
               >
                 {category.icon}
@@ -241,13 +257,6 @@ const AdminSidebar = ({
                 </motion.div>
               )}
               
-              {activeCategory === category.id && (
-                <motion.div
-                  className="w-1 h-8 bg-white rounded-full absolute right-0"
-                  layoutId="activeIndicator"
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              )}
             </motion.button>
           ))}
         </nav>

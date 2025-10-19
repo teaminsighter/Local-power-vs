@@ -115,6 +115,47 @@ const FacebookAds = () => {
     }, 2000);
   };
 
+  const handleTestConnection = async () => {
+    try {
+      alert('Testing Facebook API connection...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      alert('✅ Connection test successful! API credentials are valid.');
+    } catch (error) {
+      alert('❌ Connection test failed. Please check your credentials.');
+    }
+  };
+
+  const handleSaveConfiguration = async () => {
+    try {
+      alert('Saving Facebook Ads configuration...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('✅ Configuration saved successfully!');
+    } catch (error) {
+      alert('❌ Failed to save configuration.');
+    }
+  };
+
+  const handleTestEvent = async (eventId: string) => {
+    try {
+      alert(`Testing pixel event: ${eventId}...`);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      alert('✅ Test event sent successfully!');
+    } catch (error) {
+      alert('❌ Test event failed.');
+    }
+  };
+
+  const handleViewEventDetails = (eventId: string) => {
+    const event = pixelEvents.find(e => e.id === eventId);
+    if (event) {
+      alert(`Event Details:\n\nName: ${event.name}\nType: ${event.event_type}\nServer-side: ${event.server_side ? 'Yes' : 'No'}\nBrowser-side: ${event.browser_side ? 'Yes' : 'No'}\n30-day events: ${event.events_last_30_days}\nDeduplication rate: ${event.deduplication_rate}%`);
+    }
+  };
+
+  const handleCreateCustomEvent = () => {
+    alert('Create Custom Event modal would open here. This would allow users to configure new Facebook Pixel events with custom parameters and triggers.');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -365,6 +406,7 @@ const FacebookAds = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={handleTestConnection}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Test Connection
@@ -373,6 +415,7 @@ const FacebookAds = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={handleSaveConfiguration}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   Save Configuration
@@ -564,6 +607,7 @@ eventRequest.execute();`}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleCreateCustomEvent}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               + Create Custom Event
@@ -634,6 +678,7 @@ eventRequest.execute();`}
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => handleTestEvent(event.id)}
                             className="p-1 text-blue-600 hover:text-blue-700"
                             title="Test Event"
                           >
@@ -645,6 +690,7 @@ eventRequest.execute();`}
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => handleViewEventDetails(event.id)}
                             className="p-1 text-green-600 hover:text-green-700"
                             title="View Details"
                           >

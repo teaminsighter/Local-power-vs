@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Code, Edit, TestTube, Copy, CheckCircle, Plus, Download } from 'lucide-react';
+
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
 
 interface DataLayerEvent {
   id: string;
@@ -16,6 +23,13 @@ interface DataLayerEvent {
 
 const DataLayerEvents = () => {
   const [activeTab, setActiveTab] = useState('events');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<DataLayerEvent | null>(null);
+  const [selectedEventForCode, setSelectedEventForCode] = useState<DataLayerEvent | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
   const [newEvent, setNewEvent] = useState({
     event_name: '',
     description: '',
@@ -151,17 +165,30 @@ ${Object.entries(event.parameters).map(([key, type]) =>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            onClick={() => {
+              const gtmData = JSON.stringify({ events, version: '1.0', exported: new Date().toISOString() }, null, 2);
+              const blob = new Blob([gtmData], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'gtm-container-export.json';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
           >
+            <Download className="w-4 h-4" />
             Export GTM Container
           </motion.button>
           
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
           >
-            + Create Event
+            <Plus className="w-4 h-4" />
+            Create Event
           </motion.button>
         </div>
       </div>
@@ -250,34 +277,40 @@ ${Object.entries(event.parameters).map(([key, type]) =>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => {
+                            setSelectedEventForCode(event);
+                            setShowCodeModal(true);
+                          }}
                           className="p-1 text-blue-600 hover:text-blue-700"
                           title="View Code"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                          </svg>
+                          <Code className="w-4 h-4" />
                         </motion.button>
                         
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => {
+                            setEditingEvent(event);
+                            setShowEditModal(true);
+                          }}
                           className="p-1 text-green-600 hover:text-green-700"
                           title="Edit Event"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          <Edit className="w-4 h-4" />
                         </motion.button>
                         
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => {
+                            setEditingEvent(event);
+                            setShowTestModal(true);
+                          }}
                           className="p-1 text-purple-600 hover:text-purple-700"
                           title="Test Event"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                          </svg>
+                          <TestTube className="w-4 h-4" />
                         </motion.button>
                       </div>
                     </td>
@@ -307,9 +340,15 @@ ${Object.entries(event.parameters).map(([key, type]) =>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200 transition-colors"
+                      onClick={() => {
+                        navigator.clipboard.writeText(generateGTMCode(event));
+                        setCopySuccess(true);
+                        setTimeout(() => setCopySuccess(false), 2000);
+                      }}
+                      className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200 transition-colors flex items-center gap-1"
                     >
-                      Copy Code
+                      {copySuccess ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {copySuccess ? 'Copied!' : 'Copy Code'}
                     </motion.button>
                   </div>
                   
@@ -380,9 +419,15 @@ ${Object.entries(event.parameters).map(([key, type]) =>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  onClick={() => {
+                    const testData = { event: 'test_event', timestamp: new Date().toISOString() };
+                    console.log('Test event fired:', testData);
+                    alert('Test event fired successfully! Check console for details.');
+                  }}
+                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
                 >
-                  🧪 Fire Test Event
+                  <TestTube className="w-4 h-4" />
+                  Fire Test Event
                 </motion.button>
               </div>
             </div>
@@ -423,6 +468,292 @@ ${Object.entries(event.parameters).map(([key, type]) =>
           </div>
         </motion.div>
       )}
+
+      {/* Create Event Modal */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Create DataLayer Event</h2>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => { e.preventDefault(); handleCreateEvent(); setShowCreateModal(false); }} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
+                  <input
+                    type="text"
+                    value={newEvent.event_name}
+                    onChange={(e) => setNewEvent(prev => ({ ...prev, event_name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., button_click_insights"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    value={newEvent.description}
+                    onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    rows={3}
+                    placeholder="Describe what this event tracks..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Parameters (JSON)</label>
+                  <textarea
+                    value={newEvent.parameters}
+                    onChange={(e) => setNewEvent(prev => ({ ...prev, parameters: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
+                    rows={4}
+                    placeholder='{"button_id": "string", "page_url": "string", "user_id": "string"}'
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trigger Condition</label>
+                  <input
+                    type="text"
+                    value={newEvent.trigger_condition}
+                    onChange={(e) => setNewEvent(prev => ({ ...prev, trigger_condition: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., On button click"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Create Event
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Event Modal */}
+      <AnimatePresence>
+        {showEditModal && editingEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Edit Event: {editingEvent.event_name}</h2>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    defaultValue={editingEvent.status}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="testing">Testing</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    defaultValue={editingEvent.description}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trigger Condition</label>
+                  <input
+                    type="text"
+                    defaultValue={editingEvent.trigger_condition}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4">
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Code Modal */}
+      <AnimatePresence>
+        {showCodeModal && selectedEventForCode && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">GTM Code: {selectedEventForCode.event_name}</h2>
+                <button
+                  onClick={() => setShowCodeModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">DataLayer Push Code</h3>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateGTMCode(selectedEventForCode));
+                      setCopySuccess(true);
+                      setTimeout(() => setCopySuccess(false), 2000);
+                    }}
+                    className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors"
+                  >
+                    {copySuccess ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copySuccess ? 'Copied!' : 'Copy Code'}
+                  </button>
+                </div>
+                
+                <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-green-400 text-sm font-mono whitespace-pre">
+                    <code>{generateGTMCode(selectedEventForCode)}</code>
+                  </pre>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-900 mb-2">Implementation Notes</h4>
+                  <ul className="text-blue-800 text-sm space-y-1">
+                    <li>• Place this code where the event should trigger</li>
+                    <li>• Replace placeholder values with actual data</li>
+                    <li>• Ensure GTM container is loaded before firing</li>
+                    <li>• Test in preview mode before publishing</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Test Event Modal */}
+      <AnimatePresence>
+        {showTestModal && editingEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Test Event: {editingEvent.event_name}</h2>
+                <button
+                  onClick={() => setShowTestModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Test Parameters (JSON)</label>
+                  <textarea
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
+                    rows={6}
+                    defaultValue={JSON.stringify(editingEvent.parameters, null, 2)}
+                    placeholder='Enter test data in JSON format'
+                  />
+                </div>
+
+                <div className="bg-yellow-50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-yellow-800">
+                    <TestTube className="w-5 h-5" />
+                    <span className="font-medium">Test Mode</span>
+                  </div>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    This will fire a test event with the parameters above. Make sure GTM is in preview mode.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4">
+                  <button
+                    onClick={() => setShowTestModal(false)}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const testData = { event: editingEvent.event_name, test: true, timestamp: new Date().toISOString() };
+                      window.dataLayer = window.dataLayer || [];
+                      window.dataLayer.push(testData);
+                      console.log('Test event fired:', testData);
+                      alert('Test event fired successfully! Check GTM preview mode.');
+                      setShowTestModal(false);
+                    }}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+                  >
+                    <TestTube className="w-4 h-4" />
+                    Fire Test Event
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

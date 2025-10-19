@@ -5,9 +5,15 @@ export class BuildingInsightsService {
   private baseUrl = 'https://solar.googleapis.com/v1/buildingInsights:findClosest';
 
   constructor() {
-    this.apiKey = process.env.GOOGLE_SOLAR_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_SOLAR_API_KEY || '';
+    this.apiKey = process.env.GOOGLE_SOLAR_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_SOLAR_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('Google Solar API key not found in environment variables');
+      console.warn('Google Solar API key not found in environment variables. Available keys:', {
+        GOOGLE_SOLAR_API_KEY: !!process.env.GOOGLE_SOLAR_API_KEY,
+        NEXT_PUBLIC_SOLAR_API_KEY: !!process.env.NEXT_PUBLIC_SOLAR_API_KEY,
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      });
+    } else {
+      console.log('Google Solar API key found, length:', this.apiKey.length);
     }
   }
 
@@ -19,6 +25,12 @@ export class BuildingInsightsService {
     longitude: number,
     quality: 'HIGH' | 'MEDIUM' | 'LOW' = 'HIGH'
   ): Promise<BuildingInsightsResponse> {
+    // If no API key is available, immediately throw BUILDING_NOT_FOUND to trigger fallback
+    if (!this.apiKey) {
+      console.warn('No Google Solar API key available, using fallback data');
+      throw new Error('BUILDING_NOT_FOUND: No API key configured, using fallback solar estimation');
+    }
+
     const params = new URLSearchParams({
       'location.latitude': latitude.toFixed(6),
       'location.longitude': longitude.toFixed(6),
@@ -29,7 +41,7 @@ export class BuildingInsightsService {
     const url = `${this.baseUrl}?${params}`;
     
     try {
-      console.log('Fetching building insights:', { latitude, longitude });
+      console.log('Fetching building insights:', { latitude, longitude, apiKeyLength: this.apiKey.length });
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -38,11 +50,17 @@ export class BuildingInsightsService {
         }
         const error = await response.json();
         console.error('Building insights API error:', error);
+        
+        // If API quota is exceeded or other issues, use fallback
+        if (response.status === 429 || response.status === 403) {
+          throw new Error(`BUILDING_NOT_FOUND: API quota exceeded, using fallback solar estimation`);
+        }
+        
         throw new Error(`API Error: ${response.status} - ${error.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      console.log('Building insights response:', data);
+      console.log('Building insights response received successfully');
       return data;
     } catch (error) {
       console.error('Failed to fetch building insights:', error);

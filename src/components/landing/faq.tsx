@@ -12,29 +12,79 @@ import { pushToDataLayer } from "@/lib/gtm";
 
 const faqs = [
   {
-    id: "power-cut",
-    question: "What happens if there's a power cut?",
-    answer: "Your SOLARWATT system provides reliable backup power. It automatically switches over in less than 20 milliseconds, keeping your lights on and critical appliances like your fridge and Wi-Fi running seamlessly."
+    id: "actual-savings",
+    question: "How much will I actually save?",
+    answer: "We model your last 12 months' kWh and tariff to project self-consumption, export credits, and payback (typically 6–9 years for €2,300+/yr users)."
   },
   {
-    id: "add-batteries",
-    question: "Can I add more batteries later if my energy needs increase?",
-    answer: "Absolutely. The SOLARWATT Battery vision is a modular system. You can start with as little as 5.2 kWh of storage and easily expand in 2.6 kWh increments up to 18.2 kWh as your family or energy usage grows."
+    id: "upfront-money",
+    question: "Do I need money upfront?",
+    answer: "No. We offer 0% upfront options. SEAI grant (up to €1,800) is applied in your proposal."
   },
   {
-    id: "warranty-works",
-    question: "How does the 30-year warranty actually work?",
-    answer: "It's an all-inclusive warranty. For 30 years, we guarantee both the product against defects and its performance (to at least 87% of its original output). If a valid claim is made, we cover all costs for repair or replacement, including transport and labor. There are no hidden fees."
+    id: "grants-setup",
+    question: "Who handles grants and export setup?",
+    answer: "We do. SEAI paperwork, NC6, commissioning, smart-meter pairing, and CEG registration—and we verify your first export credit on the bill."
   },
   {
-    id: "system-safety",
-    question: "Is the system safe to install in my home?",
-    answer: "Safety is our top priority. Our batteries use LiFePO4 chemistry, the safest on the market, and are certified to the highest European and Irish safety and fire standards (including UL 9540A). This gives you complete peace of mind."
+    id: "planning-permission",
+    question: "Is planning permission required?",
+    answer: "Rooftop PV is generally exempt (outside specific safeguarding zones). We run checks and handle any exceptions."
   },
   {
-    id: "ev-charging",
-    question: "Can I charge my electric vehicle with this system?",
-    answer: "Yes. The system is designed for EV integration. The SOLARWATT Manager can intelligently schedule your car to charge using surplus solar energy, making your driving cheaper and greener."
+    id: "blackout-power",
+    question: "Will the lights stay on in a blackout?",
+    answer: "Yes—on backed-up circuits. Our battery provides ~20 ms switchover for essentials (e.g., lights, Wi-Fi, fridge)."
+  },
+  {
+    id: "battery-safety",
+    question: "How safe is the battery?",
+    answer: "LiFePO₄ chemistry (non-flammable, stable). Tested 10,000+ cycles @ 90% DoD, >95% round-trip efficiency, with a 12-year warranty."
+  },
+  {
+    id: "panel-lifespan",
+    question: "How long do panels last?",
+    answer: "German glass–glass modules carry a 30-year product & performance warranty and are built for Irish weather extremes."
+  },
+  {
+    id: "home-appearance",
+    question: "Will it look neat on my home?",
+    answer: "Yes. We design for roof symmetry, hidden conduit, labeled boards, and provide a visual mockup before install."
+  },
+  {
+    id: "smart-meter-tariff",
+    question: "Does it work with my smart meter and tariff?",
+    answer: "Absolutely. The system is smart-meter native. Our app automates night-rate charging and tracks export credits."
+  },
+  {
+    id: "system-size",
+    question: "What size system do I need?",
+    answer: "We right-size from your usage profile: typically 4–8 kWp with 5.2–18.2 kWh battery, tuned to evening peaks and EV/heat pump needs."
+  },
+  {
+    id: "installation-timeline",
+    question: "What's the installation timeline?",
+    answer: "Typical flow: remote survey → grant/NC6 filing (Day 3–5) → install & commissioning (Day 10–14) → app live → first credit confirmed next billing cycle."
+  },
+  {
+    id: "maintenance-required",
+    question: "How much maintenance is required?",
+    answer: "Minimal. No routine servicing for panels; remote monitoring flags issues. You get seasonal optimisation check-ins."
+  },
+  {
+    id: "irish-weather",
+    question: "Do panels work in Irish winters and cloudy days?",
+    answer: "Yes. Panels produce in low light; bifacial TOPCon boosts yield. Note: moonlight capture is a small trickle—not a savings driver."
+  },
+  {
+    id: "something-breaks",
+    question: "What if something breaks? Who do I call?",
+    answer: "One brand, one warranty, one Irish team. No multi-vendor runaround—we own the outcome end-to-end."
+  },
+  {
+    id: "ev-hot-water",
+    question: "Can you integrate EV charging and hot water?",
+    answer: "Yes. EV-ready by design. We'll recommend a diverter only if it beats exporting at your CEG rate."
   }
 ];
 

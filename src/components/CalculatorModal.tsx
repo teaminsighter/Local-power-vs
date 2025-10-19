@@ -119,7 +119,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
         estimatedCost: 15000 + (panelCount * 400), // Basic cost calculation
         annualSavings: 2400 + (panelCount * 120), // Basic savings calculation
         paybackPeriod: 8.5,
-        address: selectedAddress || buildingData?.address || 'Location from calculator',
+        address: selectedAddress || 'Location from calculator',
         panelCount: panelCount
       };
 
@@ -266,7 +266,12 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
         ];
 
         // Generate realistic panel locations spread across roof segments
-        const optimalPanelLocations = [];
+        const optimalPanelLocations: Array<{
+          center: { latitude: number; longitude: number };
+          orientation: 'LANDSCAPE' | 'PORTRAIT';
+          segmentIndex: number;
+          yearlyEnergyDcKwh: number;
+        }> = [];
         const segmentPanelCounts = [8, 7, 6, 4]; // Panels per segment
         
         segmentPanelCounts.forEach((panelCount, segmentIndex) => {
@@ -465,7 +470,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
   };
 
   const states = [
-    { code: 'NSW', name: 'New South Wales', rebate: 'Up to €2,400' },
+    { code: 'NSW', name: 'New South Wales', rebate: 'Up to €1,800' },
     { code: 'QLD', name: 'Queensland', rebate: 'Up to €3,500' },
     { code: 'VIC', name: 'Victoria', rebate: 'Up to €1,400' },
     { code: 'SA', name: 'South Australia', rebate: 'Up to €6,000' },
@@ -781,7 +786,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="max-w-3xl mx-auto pt-20"
+            className="w-full max-w-3xl mx-auto pt-8 sm:pt-12 md:pt-20 px-2 sm:px-4"
           >
             {/* Search Bar */}
             <div className="relative mb-8">
@@ -791,7 +796,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyPress}
                 placeholder="Input your address here"
-                className="w-full p-4 pr-12 text-lg text-gray-900 placeholder-gray-400 border-2 border-gray-300 rounded-full focus:ring-2 focus:ring-[#156644] focus:border-[#156644] outline-none shadow-sm"
+                className="w-full p-3 sm:p-4 pr-10 sm:pr-12 text-base sm:text-lg text-gray-900 placeholder-gray-400 border-2 border-gray-300 rounded-full focus:ring-2 focus:ring-[#156644] focus:border-[#156644] outline-none shadow-sm box-border"
               />
               <button className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -875,11 +880,11 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="max-w-6xl mx-auto pt-10"
+            className="w-full max-w-6xl mx-auto pt-6 sm:pt-8 md:pt-10 px-2 sm:px-4"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Electricity Bill Upload */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
                 {/* Header with icon */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -946,7 +951,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
               </div>
 
               {/* Right Column - Household Details */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
                 {/* Header with icon */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -1041,11 +1046,11 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="max-w-6xl mx-auto pt-10"
+            className="w-full max-w-6xl mx-auto pt-6 sm:pt-8 md:pt-10 px-2 sm:px-4"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Home Type & Property Details */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
                 {/* Header with icon */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -1112,7 +1117,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
               </div>
 
               {/* Right Column - Energy & Technical Requirements */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
                 {/* Header with icon */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -1180,7 +1185,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="max-w-full mx-auto h-full"
+            className="w-full max-w-full mx-auto h-full px-2 sm:px-4"
           >
             {/* Mobile Layout */}
             <div className="block lg:hidden space-y-4">
@@ -1359,11 +1364,11 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="max-w-6xl mx-auto pt-10"
+            className="w-full max-w-6xl mx-auto pt-6 sm:pt-8 md:pt-10 px-2 sm:px-4"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Contact Information */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
                 {/* Header with icon */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -1442,7 +1447,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
               </div>
 
               {/* Right Column - Verification & Summary */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
                 {/* Header with icon */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -1528,7 +1533,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="max-w-7xl mx-auto pt-6 pb-8 relative"
+            className="w-full max-w-7xl mx-auto pt-4 sm:pt-6 pb-6 sm:pb-8 relative px-2 sm:px-4"
           >
             {/* Your Total Savings - Hero Section */}
             <div className="text-center mb-8 relative">
@@ -1694,7 +1699,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-gray-100">
                     <span className="font-medium text-gray-600">Warranty:</span>
-                    <span className="font-bold text-gray-800">25 years</span>
+                    <span className="font-bold text-gray-800">30 years</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-gray-100">
                     <span className="font-medium text-gray-600">Installation Time:</span>
@@ -1732,11 +1737,11 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-gray-100">
                     <span className="font-medium text-gray-600">SEAI Grant:</span>
-                    <span className="font-bold text-[#156644]">-€{Math.min(Math.round((panelCount || 12) * 0.4 * 900), 2400).toLocaleString()}</span>
+                    <span className="font-bold text-[#156644]">-€{Math.min(Math.round((panelCount || 12) * 0.4 * 900), 1800).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-gray-100">
                     <span className="font-medium text-gray-600">Net Investment:</span>
-                    <span className="font-bold text-primary">€{Math.round((panelCount || 12) * 800 - Math.min((panelCount || 12) * 0.4 * 900, 2400)).toLocaleString()}</span>
+                    <span className="font-bold text-primary">€{Math.round((panelCount || 12) * 800 - Math.min((panelCount || 12) * 0.4 * 900, 1800)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-gray-100">
                     <span className="font-medium text-gray-600">Monthly Savings:</span>
@@ -1863,7 +1868,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </div>
 
             {/* Comprehensive Savings Report */}
-            <div className="mt-8 bg-white rounded-2xl shadow-lg p-8">
+            <div className="mt-6 sm:mt-8 bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 w-full box-border">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-[#156644] rounded flex items-center justify-center">
@@ -1873,7 +1878,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800">Your Solar Savings Report</h3>
                 </div>
-                <div className="text-xs text-gray-500">Based on Irish electricity market rates (2024)</div>
+                <div className="text-xs text-gray-500">Based on Irish electricity market rates (2025)</div>
               </div>
 
               {/* Key Savings Metrics - Top Row */}
@@ -1937,11 +1942,11 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-sm text-gray-600">SEAI Grant (Available):</span>
-                      <span className="text-sm font-medium text-[#156644]">-€{Math.min(Math.round((panelCount || 12) * 0.4 * 900), 2400).toLocaleString()}</span>
+                      <span className="text-sm font-medium text-[#156644]">-€{Math.min(Math.round((panelCount || 12) * 0.4 * 900), 1800).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-sm text-gray-600">Net Cost After Grant:</span>
-                      <span className="text-sm font-bold text-primary">€{Math.round((panelCount || 12) * 800 - Math.min((panelCount || 12) * 0.4 * 900, 2400)).toLocaleString()}</span>
+                      <span className="text-sm font-bold text-primary">€{Math.round((panelCount || 12) * 800 - Math.min((panelCount || 12) * 0.4 * 900, 1800)).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-sm text-gray-600">Current Electricity Rate:</span>
@@ -2043,7 +2048,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="max-w-4xl mx-auto pt-6 pb-8 relative"
+            className="w-full max-w-4xl mx-auto pt-4 sm:pt-6 pb-6 sm:pb-8 relative px-2 sm:px-4"
           >
             <LeadCaptureForm
               systemDetails={systemDetails}
@@ -2065,7 +2070,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-hidden modal-container"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -2076,7 +2081,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
               duration: 0.3,
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
-            className="bg-white w-full h-full overflow-hidden flex flex-col"
+            className="bg-white w-full max-w-full h-full overflow-hidden flex flex-col relative modal-content"
           >
             {/* Close Button */}
             <button
@@ -2087,7 +2092,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </button>
 
             {/* Step Counter Bar */}
-            <div className="bg-white border-b border-gray-200 px-2 sm:px-6 py-4">
+            <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-4 flex-shrink-0">
               {/* Mobile: Show only current step */}
               <div className="block sm:hidden text-center">
                 <div className="text-sm font-semibold text-gray-800">
@@ -2129,7 +2134,7 @@ const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-8 overflow-y-auto">
+            <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full box-border">
               <AnimatePresence mode="wait">
                 {renderStepContent()}
               </AnimatePresence>

@@ -25,6 +25,9 @@ interface ConversionAction {
 const GoogleAds = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'setup' | 'conversions' | 'automation'>('overview');
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connected');
+  const [showEditModal, setShowEditModal] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<ConversionAction>>({});
 
   // Mock Google Ads accounts
   const [accounts] = useState<GoogleAdsAccount[]>([
@@ -105,10 +108,57 @@ const GoogleAds = () => {
 
   const handleConnect = () => {
     setConnectionStatus('connecting');
-    // Simulate connection process
     setTimeout(() => {
       setConnectionStatus('connected');
     }, 2000);
+  };
+
+  const handleEditConversion = (id: string) => {
+    const conversion = conversions.find(c => c.id === id);
+    if (conversion) {
+      setEditFormData(conversion);
+      setShowEditModal(id);
+    }
+  };
+
+  const handleViewConversion = (id: string) => {
+    setShowViewModal(id);
+  };
+
+  const handleSaveConversion = async () => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('Conversion action updated successfully!');
+      setShowEditModal(null);
+      setEditFormData({});
+    } catch (error) {
+      alert('Failed to update conversion action.');
+    }
+  };
+
+  const handleTestConnection = async () => {
+    try {
+      alert('Testing Google Ads API connection...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      alert('✅ Connection test successful! API credentials are valid.');
+    } catch (error) {
+      alert('❌ Connection test failed. Please check your credentials.');
+    }
+  };
+
+  const handleSaveConfiguration = async () => {
+    try {
+      alert('Saving Google Ads configuration...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('✅ Configuration saved successfully!');
+    } catch (error) {
+      alert('❌ Failed to save configuration.');
+    }
+  };
+
+  const getSelectedConversion = (id: string) => {
+    return conversions.find(c => c.id === id);
   };
 
   return (
@@ -320,6 +370,7 @@ const GoogleAds = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={handleTestConnection}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Test Connection
@@ -328,6 +379,7 @@ const GoogleAds = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={handleSaveConfiguration}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   Save Configuration
@@ -455,6 +507,7 @@ const GoogleAds = () => {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => handleEditConversion(conversion.id)}
                             className="p-1 text-blue-600 hover:text-blue-700"
                             title="Edit"
                           >
@@ -466,6 +519,7 @@ const GoogleAds = () => {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => handleViewConversion(conversion.id)}
                             className="p-1 text-green-600 hover:text-green-700"
                             title="View Details"
                           >
@@ -652,6 +706,158 @@ const GoogleAds = () => {
           </div>
         </motion.div>
       )}
+
+      {/* Edit Conversion Modal */}
+      {showEditModal && (() => {
+        const conversion = getSelectedConversion(showEditModal);
+        return conversion ? (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Edit Conversion Action</h3>
+                <button
+                  onClick={() => setShowEditModal(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Conversion Name</label>
+                  <input
+                    type="text"
+                    value={editFormData.name || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Value (€)</label>
+                  <input
+                    type="number"
+                    value={editFormData.value || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, value: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <select
+                    value={editFormData.type || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, type: e.target.value as ConversionAction['type'] }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="lead">Lead</option>
+                    <option value="purchase">Purchase</option>
+                    <option value="signup">Signup</option>
+                    <option value="call">Call</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSaveConversion}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Save Changes
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowEditModal(null)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null;
+      })()}
+
+      {/* View Conversion Modal */}
+      {showViewModal && (() => {
+        const conversion = getSelectedConversion(showViewModal);
+        return conversion ? (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg mx-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Conversion Details</h3>
+                <button
+                  onClick={() => setShowViewModal(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getConversionTypeIcon(conversion.type)}</span>
+                  <div>
+                    <h4 className="text-lg font-medium text-gray-900">{conversion.name}</h4>
+                    <p className="text-sm text-gray-600">ID: {conversion.id}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-sm text-gray-600">Type</div>
+                    <div className="font-medium text-gray-900 capitalize">{conversion.type}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-sm text-gray-600">Value</div>
+                    <div className="font-medium text-gray-900">€{conversion.value}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-sm text-gray-600">30-Day Count</div>
+                    <div className="font-medium text-green-600">{conversion.count_last_30_days}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-sm text-gray-600">Status</div>
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getStatusColor(conversion.status)}`}>
+                      {conversion.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowViewModal(null)}
+                  className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 };

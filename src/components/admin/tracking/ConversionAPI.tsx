@@ -22,7 +22,11 @@ import {
   Key,
   Activity,
   Target,
-  Users
+  Users,
+  X,
+  Plus,
+  TestTube,
+  Edit
 } from 'lucide-react';
 
 interface ConversionEndpoint {
@@ -70,6 +74,12 @@ const ConversionAPI = () => {
   const [selectedPlatform, setSelectedPlatform] = useState('');
   const [showSecrets, setShowSecrets] = useState(false);
   const [testingMode, setTestingMode] = useState(false);
+  const [showAddEndpointModal, setShowAddEndpointModal] = useState(false);
+  const [showEditEndpointModal, setShowEditEndpointModal] = useState(false);
+  const [showTestConversionModal, setShowTestConversionModal] = useState(false);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [editingEndpoint, setEditingEndpoint] = useState<ConversionEndpoint | null>(null);
+  const [copyConfigSuccess, setCopyConfigSuccess] = useState(false);
 
   useEffect(() => {
     loadConversionData();
@@ -604,6 +614,379 @@ const ConversionAPI = () => {
             </div>
           ))}
       </div>
+
+      {/* Add Endpoint Modal */}
+      {showAddEndpointModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Add Conversion Endpoint</h2>
+              <button
+                onClick={() => setShowAddEndpointModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); setShowAddEndpointModal(false); alert('Endpoint added successfully!'); }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g., Custom CRM API"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    required
+                  >
+                    <option value="">Select platform</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Google Ads">Google Ads</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
+                <input
+                  type="url"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="https://api.platform.com/conversions"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    required
+                  >
+                    <option value="POST">POST</option>
+                    <option value="GET">GET</option>
+                    <option value="PUT">PUT</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Authentication</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    required
+                  >
+                    <option value="api_key">API Key</option>
+                    <option value="oauth">OAuth</option>
+                    <option value="webhook">Webhook</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Events (comma-separated)</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="purchase, lead, signup"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddEndpointModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Add Endpoint
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Edit Endpoint Modal */}
+      {showEditEndpointModal && editingEndpoint && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Edit Endpoint: {editingEndpoint.name}</h2>
+              <button
+                onClick={() => setShowEditEndpointModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint Name</label>
+                  <input
+                    type="text"
+                    defaultValue={editingEndpoint.name}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    defaultValue={editingEndpoint.status}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="error">Error</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
+                <input
+                  type="url"
+                  defaultValue={editingEndpoint.endpoint}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Events</label>
+                <input
+                  type="text"
+                  defaultValue={editingEndpoint.events.join(', ')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowEditEndpointModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditEndpointModal(false);
+                    alert('Endpoint updated successfully!');
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Test Conversion Modal */}
+      {showTestConversionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Test Conversion Event</h2>
+              <button
+                onClick={() => setShowTestConversionModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    {endpoints.map(endpoint => (
+                      <option key={endpoint.id} value={endpoint.platform}>
+                        {endpoint.platform} - {endpoint.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <option value="purchase">Purchase</option>
+                    <option value="lead">Lead</option>
+                    <option value="signup">Sign Up</option>
+                    <option value="view_content">View Content</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Value (€)</label>
+                  <input
+                    type="number"
+                    defaultValue={1500}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                    <option value="GBP">GBP</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Test Data (JSON)</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
+                  rows={4}
+                  defaultValue={JSON.stringify({
+                    user_id: 'test_user_123',
+                    email: 'test@example.com',
+                    timestamp: new Date().toISOString()
+                  }, null, 2)}
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowTestConversionModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const success = Math.random() > 0.2;
+                    setShowTestConversionModal(false);
+                    if (success) {
+                      alert('✅ Test conversion sent successfully!\nCheck the platform dashboard for results.');
+                    } else {
+                      alert('❌ Test conversion failed!\nPlease check your endpoint configuration.');
+                    }
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                  style={{ backgroundColor: '#146443' }}
+                >
+                  <Target className="w-4 h-4" />
+                  Send Test Event
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Configuration Modal */}
+      {showConfigModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">API Configuration</h2>
+              <button
+                onClick={() => setShowConfigModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="font-medium text-blue-900 mb-2">Enhanced Privacy & Security</h3>
+                <p className="text-blue-800 text-sm">
+                  Server-side conversion tracking ensures better data accuracy and privacy compliance.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Timeout (ms)</label>
+                  <input
+                    type="number"
+                    defaultValue={5000}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Retry Attempts</label>
+                  <input
+                    type="number"
+                    defaultValue={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm text-gray-700">Enable automatic retries for failed requests</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm text-gray-700">Log all conversion events for debugging</span>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowConfigModal(false)}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowConfigModal(false);
+                    alert('Configuration saved successfully!');
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Save Configuration
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

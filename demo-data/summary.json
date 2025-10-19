@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2025-10-19T06:37:18.683Z",
+  "totalRecords": 994,
+  "breakdown": {
+    "leads": 150,
+    "installations": 25,
+    "visitors": 500,
+    "questionResponses": 300,
+    "marketingCampaigns": 12,
+    "analyticsData": 7
+  },
+  "config": {
+    "leads": 150,
+    "visitors": 500,
+    "solarInstallations": 85,
+    "marketingCampaigns": 12,
+    "questionResponses": 300,
+    "crmActivities": 200,
+    "timeRangeMonths": 6
+  }
+}

@@ -6,8 +6,7 @@ import { Facebook, TrendingUp, Users, DollarSign, Eye, MousePointer, Target, Cal
 
 const FacebookCampaigns = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
-
-  const campaigns = [
+  const [campaigns, setCampaigns] = useState([
     {
       id: 'fb-solar-awareness',
       name: 'Solar Panel Awareness',
@@ -56,7 +55,54 @@ const FacebookCampaigns = () => {
       startDate: '2025-09-15',
       endDate: '2025-10-15'
     }
-  ];
+  ]);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<string | null>(null);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  const handleCreateCampaign = () => {
+    setShowCreateModal(true);
+  };
+
+  const handleToggleCampaign = (campaignId: string) => {
+    setCampaigns(prev => prev.map(campaign => {
+      if (campaign.id === campaignId) {
+        const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+        return { ...campaign, status: newStatus };
+      }
+      return campaign;
+    }));
+  };
+
+  const handleEditCampaign = (campaignId: string) => {
+    setShowEditModal(campaignId);
+  };
+
+  const handleOpenSettings = () => {
+    setShowSettingsModal(true);
+  };
+
+  const handleCreateNewCampaign = (campaignData: any) => {
+    const newCampaign = {
+      id: `fb-${Date.now()}`,
+      name: campaignData.name,
+      status: 'active',
+      budget: campaignData.budget,
+      spent: 0,
+      reach: 0,
+      engagement: 0,
+      clicks: 0,
+      leads: 0,
+      ctr: 0,
+      cpc: 0,
+      costPerLead: 0,
+      startDate: campaignData.startDate,
+      endDate: campaignData.endDate
+    };
+    setCampaigns(prev => [...prev, newCampaign]);
+    setShowCreateModal(false);
+  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -72,14 +118,27 @@ const FacebookCampaigns = () => {
           </div>
         </div>
         
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Target className="w-4 h-4" />
-          Create Campaign
-        </motion.button>
+        <div className="flex items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleOpenSettings}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Facebook Campaign Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleCreateCampaign}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-blue-700 flex items-center gap-2 shadow-sm"
+          >
+            <Target className="w-4 h-4" />
+            Create Campaign
+          </motion.button>
+        </div>
       </div>
 
       {/* Performance Overview */}
@@ -226,13 +285,18 @@ const FacebookCampaigns = () => {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setSelectedCampaign(selectedCampaign === campaign.id ? null : campaign.id)}
+                    onClick={() => handleToggleCampaign(campaign.id)}
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    title={campaign.status === 'active' ? 'Pause Campaign' : 'Resume Campaign'}
                   >
                     {campaign.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </button>
                   
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <button 
+                    onClick={() => handleEditCampaign(campaign.id)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Edit Campaign"
+                  >
                     <Settings className="w-4 h-4" />
                   </button>
                 </div>
@@ -258,6 +322,255 @@ const FacebookCampaigns = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Create Campaign Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Create Facebook Campaign</h3>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Solar Panel Awareness Q4"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Objective</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option>Lead Generation</option>
+                    <option>Traffic</option>
+                    <option>Conversions</option>
+                    <option>Brand Awareness</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Daily Budget (€)</label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Duration</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option>7 days</option>
+                    <option>14 days</option>
+                    <option>30 days</option>
+                    <option>Custom</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Age range (e.g., 25-65)"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Location (e.g., Ireland)"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Interests & Behaviors</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="e.g., Solar energy, Home improvement, Environmental sustainability"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-8">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  handleCreateNewCampaign({
+                    name: "New Campaign",
+                    budget: 800,
+                    startDate: new Date().toISOString().split('T')[0],
+                    endDate: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
+                  });
+                }}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Create Campaign
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Edit Campaign Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Edit Campaign</h3>
+              <button
+                onClick={() => setShowEditModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Name</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  defaultValue={campaigns.find(c => c.id === showEditModal)?.name}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Daily Budget (€)</label>
+                <input
+                  type="number"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  defaultValue={campaigns.find(c => c.id === showEditModal)?.budget}
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowEditModal(null)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Changes
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowEditModal(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg mx-4"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Facebook Campaign Settings</h3>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Default Campaign Duration</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option>30 days</option>
+                  <option>60 days</option>
+                  <option>90 days</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Auto-pause Low Performers</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option>Enabled</option>
+                  <option>Disabled</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notification Email</label>
+                <input
+                  type="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="admin@localpower.ie"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowSettingsModal(false)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Settings
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowSettingsModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

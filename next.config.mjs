@@ -26,6 +26,11 @@ const nextConfig = {
       },
     ],
   },
+  // Fix for ngrok cross-origin requests
+  allowedDevOrigins: [
+    'local-power-vs.ngrok.app',
+    'https://local-power-vs.ngrok.app'
+  ],
   async headers() {
     return [
       {
@@ -34,6 +39,18 @@ const nextConfig = {
           {
             key: 'ngrok-skip-browser-warning',
             value: 'true',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
           },
         ],
       },

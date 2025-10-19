@@ -1,0 +1,88 @@
+[
+  {
+    "stepNumber": 1,
+    "stepName": "Welcome",
+    "totalEntries": 500,
+    "completions": 392,
+    "dropOffs": 108,
+    "conversionRate": 78.4,
+    "averageDuration": 115,
+    "popularChoices": {},
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  },
+  {
+    "stepNumber": 2,
+    "stepName": "State Selection",
+    "totalEntries": 395,
+    "completions": 348,
+    "dropOffs": 47,
+    "conversionRate": 88.10126582278481,
+    "averageDuration": 101,
+    "popularChoices": {
+      "Dublin": 45,
+      "Cork": 25,
+      "Galway": 15,
+      "Limerick": 15
+    },
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  },
+  {
+    "stepNumber": 3,
+    "stepName": "Solution Selection",
+    "totalEntries": 326,
+    "completions": 240,
+    "dropOffs": 86,
+    "conversionRate": 73.61963190184049,
+    "averageDuration": 111,
+    "popularChoices": {
+      "Solar Panels Only": 60,
+      "Solar + Battery": 30,
+      "Heat Pump + Solar": 10
+    },
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  },
+  {
+    "stepNumber": 4,
+    "stepName": "Address Input",
+    "totalEntries": 235,
+    "completions": 187,
+    "dropOffs": 48,
+    "conversionRate": 79.57446808510639,
+    "averageDuration": 70,
+    "popularChoices": {},
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  },
+  {
+    "stepNumber": 5,
+    "stepName": "Map Analysis",
+    "totalEntries": 224,
+    "completions": 168,
+    "dropOffs": 56,
+    "conversionRate": 75,
+    "averageDuration": 18,
+    "popularChoices": {},
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  },
+  {
+    "stepNumber": 6,
+    "stepName": "Panel Configuration",
+    "totalEntries": 168,
+    "completions": 143,
+    "dropOffs": 25,
+    "conversionRate": 85.11904761904762,
+    "averageDuration": 93,
+    "popularChoices": {},
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  },
+  {
+    "stepNumber": 7,
+    "stepName": "Lead Capture",
+    "totalEntries": 120,
+    "completions": 103,
+    "dropOffs": 17,
+    "conversionRate": 85.83333333333333,
+    "averageDuration": 25,
+    "popularChoices": {},
+    "createdAt": "2025-10-19T06:37:18.679Z"
+  }
+]

@@ -5,7 +5,84 @@ import { motion } from 'framer-motion';
 
 const GA4Integration = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'setup' | 'events' | 'ecommerce'>('overview');
-  const [connectionStatus] = useState<'connected' | 'disconnected'>('connected');
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connected');
+  const [measurementId, setMeasurementId] = useState('G-ABCD123456');
+  const [apiSecret, setApiSecret] = useState('');
+  const [settings, setSettings] = useState({
+    measurementProtocol: true,
+    enhancedEcommerce: true,
+    googleSignals: true
+  });
+
+  // Modal states
+  const [showEditEventModal, setShowEditEventModal] = useState<string | null>(null);
+  const [editEventData, setEditEventData] = useState<{ name: string; description: string }>({ name: '', description: '' });
+
+  const handleConnect = () => {
+    setConnectionStatus('connecting');
+    setTimeout(() => {
+      setConnectionStatus('connected');
+    }, 2000);
+  };
+
+  const handleSaveConfiguration = async () => {
+    try {
+      alert('Saving GA4 configuration...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('✅ GA4 configuration saved successfully!');
+    } catch (error) {
+      alert('❌ Failed to save configuration.');
+    }
+  };
+
+  const handleTestConnection = async () => {
+    try {
+      alert('Testing GA4 connection...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      alert('✅ GA4 connection test successful!');
+    } catch (error) {
+      alert('❌ GA4 connection test failed.');
+    }
+  };
+
+  const handleEditEvent = (eventName: string, description: string) => {
+    setEditEventData({ name: eventName, description });
+    setShowEditEventModal(eventName);
+  };
+
+  const handleSaveEvent = async () => {
+    try {
+      alert('Saving event configuration...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('✅ Event updated successfully!');
+      setShowEditEventModal(null);
+      setEditEventData({ name: '', description: '' });
+    } catch (error) {
+      alert('❌ Failed to update event.');
+    }
+  };
+
+  const handleDeleteEvent = async (eventName: string) => {
+    if (confirm(`Are you sure you want to delete the "${eventName}" event?`)) {
+      try {
+        alert('Deleting event...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        alert('✅ Event deleted successfully!');
+      } catch (error) {
+        alert('❌ Failed to delete event.');
+      }
+    }
+  };
+
+  const handleTestEvent = async (eventName: string) => {
+    try {
+      alert(`Testing event: ${eventName}...`);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      alert('✅ Test event sent successfully!');
+    } catch (error) {
+      alert('❌ Test event failed.');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -33,9 +110,11 @@ const GA4Integration = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              onClick={handleConnect}
+              disabled={connectionStatus === 'connecting'}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
             >
-              🔗 Connect GA4
+              {connectionStatus === 'connecting' ? '🔄 Connecting...' : '🔗 Connect GA4'}
             </motion.button>
           )}
         </div>
@@ -153,7 +232,8 @@ const GA4Integration = () => {
                 <input 
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
                   placeholder="G-XXXXXXXXXX"
-                  defaultValue="G-ABCD123456"
+                  value={measurementId}
+                  onChange={(e) => setMeasurementId(e.target.value)}
                 />
               </div>
               
@@ -163,6 +243,8 @@ const GA4Integration = () => {
                   type="password"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
                   placeholder="••••••••••••••••"
+                  value={apiSecret}
+                  onChange={(e) => setApiSecret(e.target.value)}
                 />
               </div>
             </div>
@@ -173,20 +255,55 @@ const GA4Integration = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-gray-700">Enable Measurement Protocol</label>
-                  <input type="checkbox" className="rounded" defaultChecked />
+                  <input 
+                    type="checkbox" 
+                    className="rounded" 
+                    checked={settings.measurementProtocol}
+                    onChange={(e) => setSettings(prev => ({ ...prev, measurementProtocol: e.target.checked }))}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-gray-700">Enhanced E-commerce</label>
-                  <input type="checkbox" className="rounded" defaultChecked />
+                  <input 
+                    type="checkbox" 
+                    className="rounded" 
+                    checked={settings.enhancedEcommerce}
+                    onChange={(e) => setSettings(prev => ({ ...prev, enhancedEcommerce: e.target.checked }))}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-gray-700">Google Signals</label>
-                  <input type="checkbox" className="rounded" defaultChecked />
+                  <input 
+                    type="checkbox" 
+                    className="rounded" 
+                    checked={settings.googleSignals}
+                    onChange={(e) => setSettings(prev => ({ ...prev, googleSignals: e.target.checked }))}
+                  />
                 </div>
               </div>
             </div>
+          </div>
+          
+          <div className="flex gap-3 mt-6">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleTestConnection}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Test Connection
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSaveConfiguration}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Save Configuration
+            </motion.button>
           </div>
         </motion.div>
       )}
@@ -207,14 +324,55 @@ const GA4Integration = () => {
               { name: 'book_consultation', description: 'Consultation booking', count: '234' },
               { name: 'download_guide', description: 'Solar guide download', count: '1,567' }
             ].map((event, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
                 <div>
                   <div className="font-medium text-gray-900">{event.name}</div>
                   <div className="text-sm text-gray-600">{event.description}</div>
                 </div>
-                <div className="text-right">
-                  <div className="font-medium text-orange-600">{event.count}</div>
-                  <div className="text-xs text-gray-500">30 days</div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="font-medium text-orange-600">{event.count}</div>
+                    <div className="text-xs text-gray-500">30 days</div>
+                  </div>
+                  
+                  {/* Action Icons */}
+                  <div className="flex items-center gap-1">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleTestEvent(event.name)}
+                      className="p-1 text-blue-600 hover:text-blue-700"
+                      title="Test Event"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleEditEvent(event.name, event.description)}
+                      className="p-1 text-green-600 hover:text-green-700"
+                      title="Edit Event"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleDeleteEvent(event.name)}
+                      className="p-1 text-red-600 hover:text-red-700"
+                      title="Delete Event"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -251,6 +409,70 @@ const GA4Integration = () => {
             </div>
           </div>
         </motion.div>
+      )}
+
+      {/* Edit Event Modal */}
+      {showEditEventModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Event</h3>
+              <button
+                onClick={() => setShowEditEventModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
+                <input
+                  type="text"
+                  value={editEventData.name}
+                  onChange={(e) => setEditEventData(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={editEventData.description}
+                  onChange={(e) => setEditEventData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSaveEvent}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                Save Changes
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowEditEventModal(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

@@ -18,17 +18,14 @@ import {
   Mail,
   Phone,
   Calendar,
-  MoreVertical,
-  Settings,
   Clock,
   CheckCircle,
   XCircle,
   AlertTriangle,
   Download,
-  Upload,
-  Key,
   Lock,
-  Unlock
+  Unlock,
+  X
 } from 'lucide-react';
 
 interface User {
@@ -64,8 +61,11 @@ const ManageUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showViewModal, setShowViewModal] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<User>>({});
 
   useEffect(() => {
     loadUsersData();
@@ -255,6 +255,55 @@ const ManageUsers = () => {
     setSelectedUsers([]);
   };
 
+  const handleViewUser = (userId: string) => {
+    setShowViewModal(userId);
+  };
+
+  const handleEditUser = (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      setEditFormData({
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        department: user.department
+      });
+      setShowEditModal(userId);
+    }
+  };
+
+  const handleSaveUser = async () => {
+    if (showEditModal && editFormData) {
+      try {
+        setUsers(prev => prev.map(user => 
+          user.id === showEditModal 
+            ? { ...user, ...editFormData }
+            : user
+        ));
+        setShowEditModal(null);
+        setEditFormData({});
+        alert('User updated successfully!');
+      } catch (error) {
+        alert('Failed to update user.');
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      setUsers(prev => prev.filter(user => user.id !== userId));
+      setShowDeleteModal(null);
+      alert('User deleted successfully!');
+    } catch (error) {
+      alert('Failed to delete user.');
+    }
+  };
+
+  const getSelectedUser = (userId: string) => {
+    return users.find(u => u.id === userId);
+  };
+
   const roles = [
     { id: 'all', name: 'All Roles' },
     { id: 'admin', name: 'Admin' },
@@ -319,7 +368,7 @@ const ManageUsers = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setShowInviteModal(true)}
+onClick={() => alert('Invite User functionality would be implemented here')}
             className="text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
             style={{ backgroundColor: '#146443' }}
           >
@@ -536,14 +585,14 @@ const ManageUsers = () => {
                   <td className="py-4 px-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {user.isEmailVerified ? (
-                        <CheckCircle className="w-4 h-4 text-green-600" title="Email Verified" />
+                        <CheckCircle className="w-4 h-4 text-green-600" />
                       ) : (
-                        <XCircle className="w-4 h-4 text-red-600" title="Email Not Verified" />
+                        <XCircle className="w-4 h-4 text-red-600" />
                       )}
                       {user.isTwoFactorEnabled ? (
-                        <Lock className="w-4 h-4 text-green-600" title="2FA Enabled" />
+                        <Lock className="w-4 h-4 text-green-600" />
                       ) : (
-                        <Unlock className="w-4 h-4 text-gray-400" title="2FA Disabled" />
+                        <Unlock className="w-4 h-4 text-gray-400" />
                       )}
                     </div>
                   </td>
@@ -552,6 +601,7 @@ const ManageUsers = () => {
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() => handleViewUser(user.id)}
                         className="p-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
                       >
                         <Eye className="w-4 h-4" />
@@ -559,6 +609,7 @@ const ManageUsers = () => {
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() => handleEditUser(user.id)}
                         className="p-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                       >
                         <Edit className="w-4 h-4" />
@@ -585,9 +636,10 @@ const ManageUsers = () => {
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className="p-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                          onClick={() => setShowDeleteModal(user.id)}
+                          className="p-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
                         >
-                          <MoreVertical className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" />
                         </motion.button>
                       )}
                     </div>
@@ -606,6 +658,319 @@ const ManageUsers = () => {
           <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
         </div>
       )}
+
+      {/* View User Modal */}
+      {showViewModal && (() => {
+        const user = getSelectedUser(showViewModal);
+        return user ? (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">User Details</h3>
+                <button
+                  onClick={() => setShowViewModal(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                    <span className="text-xl font-medium text-gray-600">
+                      {user.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-medium text-gray-900">{user.name}</h4>
+                    <p className="text-gray-600">{user.email}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getRoleIcon(user.role)}
+                      <span className="text-sm text-gray-600">{user.role}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact</label>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mail className="w-4 h-4" />
+                          {user.email}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="w-4 h-4" />
+                          {user.phone}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                      <p className="text-sm text-gray-900">{user.department}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(user.status)}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
+                          {user.status}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Security</label>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          {user.isEmailVerified ? (
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          )}
+                          <span className={user.isEmailVerified ? 'text-green-600' : 'text-red-600'}>
+                            Email {user.isEmailVerified ? 'Verified' : 'Not Verified'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          {user.isTwoFactorEnabled ? (
+                            <Lock className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Unlock className="w-4 h-4 text-gray-400" />
+                          )}
+                          <span className={user.isTwoFactorEnabled ? 'text-green-600' : 'text-gray-600'}>
+                            2FA {user.isTwoFactorEnabled ? 'Enabled' : 'Disabled'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Activity</label>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div>Login Count: {user.loginCount}</div>
+                      <div>Last Login: {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</div>
+                      <div>Member Since: {new Date(user.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Permissions</label>
+                    <div className="flex flex-wrap gap-1">
+                      {user.permissions.map((permission, index) => (
+                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                          {permission.replace('_', ' ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowViewModal(null)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null;
+      })()}
+
+      {/* Edit User Modal */}
+      {showEditModal && (() => {
+        const user = getSelectedUser(showEditModal);
+        return user ? (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Edit User</h3>
+                <button
+                  onClick={() => setShowEditModal(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={editFormData.phone || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={editFormData.role || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, role: e.target.value as User['role'] }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                    <option value="sales">Sales</option>
+                    <option value="support">Support</option>
+                    <option value="viewer">Viewer</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.department || ''}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, department: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSaveUser}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Save Changes
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowEditModal(null)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null;
+      })()}
+
+      {/* Delete User Modal */}
+      {showDeleteModal && (() => {
+        const user = getSelectedUser(showDeleteModal);
+        return user ? (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Delete User</h3>
+                <button
+                  onClick={() => setShowDeleteModal(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                  <div>
+                    <p className="text-gray-900 font-medium">Are you sure you want to delete this user?</p>
+                    <p className="text-sm text-gray-600 mt-1">This action cannot be undone.</p>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-600">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">{user.name}</div>
+                      <div className="text-sm text-gray-600">{user.email}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleDeleteUser(showDeleteModal)}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete User
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowDeleteModal(null)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 };

@@ -7,8 +7,7 @@ import { Calendar, Plus, Facebook, Instagram, Linkedin, Play, Clock, Eye, Heart,
 const ContentCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week'>('week');
-
-  const contentPosts = [
+  const [posts, setPosts] = useState([
     {
       id: 'post-1',
       title: 'Solar Panel Installation Benefits',
@@ -69,7 +68,32 @@ const ContentCalendar = () => {
       engagement: { likes: 0, comments: 0, shares: 0 },
       reach: 0
     }
-  ];
+  ]);
+
+  const handleEditPost = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      alert(`Edit Post: ${post.title}\n\nThis would open a modal with:\n- Content editor\n- Schedule modification\n- Platform settings\n- Performance analytics`);
+    }
+  };
+
+  const handleDeletePost = (postId: string) => {
+    if (confirm('Are you sure you want to delete this post?')) {
+      setPosts(prev => prev.filter(post => post.id !== postId));
+      alert('Post deleted successfully!');
+    }
+  };
+
+  const handlePublishPost = (postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { ...post, status: 'published' }
+        : post
+    ));
+    alert('Post published successfully!');
+  };
+
+  const contentPosts = posts;
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -127,6 +151,7 @@ const ContentCalendar = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => alert('Create Post modal would open with:\n\n- Platform selection\n- Content editor\n- Image/video upload\n- Scheduling options\n- Hashtag suggestions\n- Preview functionality')}
             className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-purple-700 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
