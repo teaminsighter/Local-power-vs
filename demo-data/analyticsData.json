@@ -2,87 +2,87 @@
   {
     "stepNumber": 1,
     "stepName": "Welcome",
-    "totalEntries": 500,
-    "completions": 392,
-    "dropOffs": 108,
-    "conversionRate": 78.4,
-    "averageDuration": 115,
+    "totalEntries": 533,
+    "completions": 452,
+    "dropOffs": 81,
+    "conversionRate": 84.80300187617262,
+    "averageDuration": 116,
     "popularChoices": {},
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   },
   {
     "stepNumber": 2,
     "stepName": "State Selection",
-    "totalEntries": 395,
-    "completions": 348,
-    "dropOffs": 47,
-    "conversionRate": 88.10126582278481,
-    "averageDuration": 101,
+    "totalEntries": 370,
+    "completions": 303,
+    "dropOffs": 67,
+    "conversionRate": 81.89189189189189,
+    "averageDuration": 73,
     "popularChoices": {
       "Dublin": 45,
       "Cork": 25,
       "Galway": 15,
       "Limerick": 15
     },
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   },
   {
     "stepNumber": 3,
     "stepName": "Solution Selection",
-    "totalEntries": 326,
-    "completions": 240,
-    "dropOffs": 86,
-    "conversionRate": 73.61963190184049,
-    "averageDuration": 111,
+    "totalEntries": 302,
+    "completions": 223,
+    "dropOffs": 79,
+    "conversionRate": 73.84105960264901,
+    "averageDuration": 104,
     "popularChoices": {
       "Solar Panels Only": 60,
       "Solar + Battery": 30,
       "Heat Pump + Solar": 10
     },
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   },
   {
     "stepNumber": 4,
     "stepName": "Address Input",
-    "totalEntries": 235,
-    "completions": 187,
+    "totalEntries": 216,
+    "completions": 168,
     "dropOffs": 48,
-    "conversionRate": 79.57446808510639,
-    "averageDuration": 70,
+    "conversionRate": 77.77777777777779,
+    "averageDuration": 117,
     "popularChoices": {},
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   },
   {
     "stepNumber": 5,
     "stepName": "Map Analysis",
-    "totalEntries": 224,
-    "completions": 168,
-    "dropOffs": 56,
-    "conversionRate": 75,
-    "averageDuration": 18,
+    "totalEntries": 170,
+    "completions": 141,
+    "dropOffs": 29,
+    "conversionRate": 82.94117647058825,
+    "averageDuration": 63,
     "popularChoices": {},
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   },
   {
     "stepNumber": 6,
     "stepName": "Panel Configuration",
-    "totalEntries": 168,
-    "completions": 143,
-    "dropOffs": 25,
-    "conversionRate": 85.11904761904762,
-    "averageDuration": 93,
+    "totalEntries": 161,
+    "completions": 115,
+    "dropOffs": 46,
+    "conversionRate": 71.42857142857143,
+    "averageDuration": 44,
     "popularChoices": {},
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   },
   {
     "stepNumber": 7,
     "stepName": "Lead Capture",
-    "totalEntries": 120,
-    "completions": 103,
-    "dropOffs": 17,
-    "conversionRate": 85.83333333333333,
-    "averageDuration": 25,
+    "totalEntries": 97,
+    "completions": 69,
+    "dropOffs": 28,
+    "conversionRate": 71.1340206185567,
+    "averageDuration": 63,
     "popularChoices": {},
-    "createdAt": "2025-10-19T06:37:18.679Z"
+    "createdAt": "2025-10-22T16:43:18.657Z"
   }
 ]

@@ -1,0 +1,490 @@
+// Optimized Production Schema for Local Power
+// Optimizations: Improved indexing, data types, constraints, and performance
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] // Support for containers
+}
+
+datasource db {
+  provider = "postgresql" // Changed from SQLite to PostgreSQL for production
+  url      = env("DATABASE_URL")
+  // Connection pooling configuration
+  relationMode = "prisma" // Enable for better performance
+}
+
+// Core User Management
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique @db.VarChar(255)
+  firstName     String        @map("first_name") @db.VarChar(100)
+  lastName      String        @map("last_name") @db.VarChar(100)
+  passwordHash  String?       @map("password_hash") @db.VarChar(255) // For NextAuth
+  role          Role          @default(VIEWER)
+  isActive      Boolean       @default(true) @map("is_active")
+  lastLoginAt   DateTime?     @map("last_login_at")
+  loginCount    Int           @default(0) @map("login_count")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  permissions   UserPermission[]
+  sessions      UserSession[]
+
+  // Optimized indexes
+  @@index([email], map: "idx_user_email")
+  @@index([role, isActive], map: "idx_user_role_active")
+  @@index([createdAt], map: "idx_user_created")
+  @@map("users")
+}
+
+// User Sessions for NextAuth
+model UserSession {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  sessionToken String   @unique @map("session_token") @db.VarChar(255)
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_session_user")
+  @@index([expires], map: "idx_session_expires")
+  @@map("user_sessions")
+}
+
+model UserPermission {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  category   String   @db.VarChar(50)
+  tab        String   @db.VarChar(50)
+  canView    Boolean  @default(false) @map("can_view")
+  canEdit    Boolean  @default(false) @map("can_edit")
+  canDelete  Boolean  @default(false) @map("can_delete")
+  canExport  Boolean  @default(false) @map("can_export")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, tab])
+  @@index([userId], map: "idx_permission_user")
+  @@index([category], map: "idx_permission_category")
+  @@map("user_permissions")
+}
+
+// Enhanced Lead Management
+model Lead {
+  id                  String            @id @default(cuid())
+  firstName           String            @map("first_name") @db.VarChar(100)
+  lastName            String            @map("last_name") @db.VarChar(100)
+  email               String            @db.VarChar(255)
+  phone               String?           @db.VarChar(50)
+  contactPreference   ContactPreference @default(EMAIL) @map("contact_preference")
+  bestTimeToCall      String?           @map("best_time_to_call") @db.VarChar(100)
+  status              LeadStatus        @default(NEW)
+  source              String            @default("website") @db.VarChar(100)
+  score               Int               @default(0) @db.SmallInt
+  priority            LeadPriority      @default(MEDIUM)
+  tags                String?           @db.Text
+  notes               String?           @db.Text
+  
+  // Enhanced tracking
+  assignedTo          String?           @map("assigned_to") @db.VarChar(100)
+  lastContactedAt     DateTime?         @map("last_contacted_at")
+  nextFollowUpAt      DateTime?         @map("next_follow_up_at")
+  conversionDate      DateTime?         @map("conversion_date")
+  estimatedValue      Decimal?          @map("estimated_value") @db.Decimal(12,2)
+  actualValue         Decimal?          @map("actual_value") @db.Decimal(12,2)
+  
+  // UTM and tracking parameters
+  utmCampaign         String?           @map("utm_campaign") @db.VarChar(255)
+  utmSource           String?           @map("utm_source") @db.VarChar(255)
+  utmMedium           String?           @map("utm_medium") @db.VarChar(255)
+  utmContent          String?           @map("utm_content") @db.VarChar(255)
+  utmTerm             String?           @map("utm_term") @db.VarChar(255)
+  
+  // Click IDs
+  gclid               String?           @map("gclid") @db.VarChar(255)
+  fbclid              String?           @map("fbclid") @db.VarChar(255)
+  
+  // User and device tracking
+  visitorUserId       String?           @map("visitor_user_id") @db.VarChar(255)
+  ipAddress           String?           @map("ip_address") @db.VarChar(45) // IPv6 support
+  userAgent           String?           @map("user_agent") @db.Text
+  deviceType          String?           @map("device_type") @db.VarChar(50)
+  browserInfo         Json?             @map("browser_info")
+  geoLocation         Json?             @map("geo_location")
+  
+  // Form and page tracking
+  formId              String?           @map("form_id") @db.VarChar(100)
+  landingPageUrl      String?           @map("landing_page_url") @db.VarChar(2048)
+  referrerUrl         String?           @map("referrer_url") @db.VarChar(2048)
+  
+  // A/B testing
+  abTestId            String?           @map("ab_test_id")
+  abVariant           ABVariant?        @map("ab_variant")
+  
+  // Timestamps
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+  
+  // Relations
+  systemDetails       SystemDetails?
+  activities          LeadActivity[]
+  abTest              ABTest?           @relation(fields: [abTestId], references: [id])
+
+  // Optimized indexes for performance
+  @@index([email], map: "idx_lead_email")
+  @@index([status], map: "idx_lead_status")
+  @@index([source], map: "idx_lead_source")
+  @@index([priority, status], map: "idx_lead_priority_status")
+  @@index([createdAt], map: "idx_lead_created")
+  @@index([score], map: "idx_lead_score")
+  @@index([assignedTo], map: "idx_lead_assigned")
+  @@index([nextFollowUpAt], map: "idx_lead_followup")
+  @@index([visitorUserId], map: "idx_lead_visitor")
+  @@index([utmCampaign, utmSource], map: "idx_lead_utm")
+  @@map("leads")
+}
+
+// Lead activity tracking
+model LeadActivity {
+  id          String            @id @default(cuid())
+  leadId      String            @map("lead_id")
+  activityType LeadActivityType
+  description String           @db.Text
+  details     Json?            // Additional metadata
+  performedBy String?          @map("performed_by") @db.VarChar(100)
+  timestamp   DateTime         @default(now())
+  lead        Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId], map: "idx_activity_lead")
+  @@index([activityType], map: "idx_activity_type")
+  @@index([timestamp], map: "idx_activity_timestamp")
+  @@map("lead_activities")
+}
+
+// Enhanced system details with validation
+model SystemDetails {
+  id            String    @id @default(cuid())
+  leadId        String    @unique @map("lead_id")
+  systemSize    Decimal   @map("system_size") @db.Decimal(6,2) // kW
+  estimatedCost Decimal   @map("estimated_cost") @db.Decimal(12,2) // Euro
+  annualSavings Decimal   @map("annual_savings") @db.Decimal(10,2) // Euro
+  paybackPeriod Decimal   @map("payback_period") @db.Decimal(4,1) // Years
+  panelCount    Int       @map("panel_count") @db.SmallInt
+  roofArea      Decimal   @map("roof_area") @db.Decimal(8,2) // m²
+  monthlyBill   Decimal   @map("monthly_bill") @db.Decimal(8,2) // Euro
+  usageKwh      Int       @map("usage_kwh") // Annual kWh
+  address       String    @db.VarChar(500)
+  latitude      Decimal?  @db.Decimal(10,8)
+  longitude     Decimal?  @db.Decimal(11,8)
+  propertyType  PropertyType @map("property_type")
+  roofType      RoofType  @map("roof_type")
+  roofAngle     Int?      @map("roof_angle") @db.SmallInt // Degrees
+  shadingFactor Decimal?  @map("shading_factor") @db.Decimal(3,2) // 0-1
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  lead          Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([systemSize], map: "idx_system_size")
+  @@index([estimatedCost], map: "idx_system_cost")
+  @@index([propertyType], map: "idx_system_property_type")
+  @@map("system_details")
+}
+
+// Dynamic pricing system
+model PricingTier {
+  id            String    @id @default(cuid())
+  name          String    @db.VarChar(100)
+  description   String?   @db.Text
+  pricePerWatt  Decimal   @map("price_per_watt") @db.Decimal(6,2)
+  minSystemSize Decimal   @map("min_system_size") @db.Decimal(6,2)
+  maxSystemSize Decimal?  @map("max_system_size") @db.Decimal(6,2)
+  region        String?   @db.VarChar(100) // Geographic region
+  validFrom     DateTime  @map("valid_from")
+  validUntil    DateTime? @map("valid_until")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([isActive, validFrom, validUntil], map: "idx_pricing_active")
+  @@index([minSystemSize, maxSystemSize], map: "idx_pricing_size_range")
+  @@map("pricing_tiers")
+}
+
+// Enhanced visitor tracking
+model VisitorTracking {
+  id            String    @id @default(cuid())
+  visitorUserId String?   @map("visitor_user_id") @db.VarChar(255)
+  sessionId     String    @map("session_id") @db.VarChar(255)
+  ipAddress     String    @map("ip_address") @db.VarChar(45)
+  country       String?   @db.VarChar(2) // ISO country code
+  region        String?   @db.VarChar(100)
+  city          String?   @db.VarChar(100)
+  timezone      String?   @db.VarChar(50)
+  userAgent     String?   @map("user_agent") @db.Text
+  page          String    @db.VarChar(2048)
+  pageTitle     String?   @map("page_title") @db.VarChar(255)
+  referrer      String?   @db.VarChar(2048)
+  deviceType    String?   @map("device_type") @db.VarChar(50)
+  browser       String?   @db.VarChar(100)
+  browserVersion String? @map("browser_version") @db.VarChar(50)
+  os            String?   @db.VarChar(100)
+  screenSize    String?   @map("screen_size") @db.VarChar(20)
+  language      String?   @db.VarChar(10)
+  isBot         Boolean   @default(false) @map("is_bot")
+  timestamp     DateTime  @default(now())
+  stayTime      Int?      @map("stay_time") // seconds
+  scrollDepth   Int?      @map("scroll_depth") // percentage
+  clickCount    Int       @default(0) @map("click_count")
+  actions       Json?     // User interaction events
+
+  @@index([visitorUserId], map: "idx_tracking_visitor")
+  @@index([sessionId], map: "idx_tracking_session")
+  @@index([ipAddress], map: "idx_tracking_ip")
+  @@index([timestamp], map: "idx_tracking_timestamp")
+  @@index([page], map: "idx_tracking_page")
+  @@index([isBot], map: "idx_tracking_bot")
+  @@map("visitor_tracking")
+}
+
+// Performance optimization: separate table for aggregated visitor data
+model VisitorProfile {
+  id                  String        @id @default(cuid())
+  visitorUserId       String        @unique @map("visitor_user_id") @db.VarChar(255)
+  fingerprint         String?       @unique @db.VarChar(255)
+  firstName           String?       @map("first_name") @db.VarChar(100)
+  lastName            String?       @map("last_name") @db.VarChar(100)
+  email               String?       @db.VarChar(255)
+  phone               String?       @db.VarChar(50)
+  firstVisit          DateTime      @map("first_visit")
+  lastVisit           DateTime      @map("last_visit")
+  totalVisits         Int           @default(1) @map("total_visits")
+  totalSessionTime    Int           @default(0) @map("total_session_time") // seconds
+  totalPagesViewed    Int           @default(0) @map("total_pages_viewed")
+  avgSessionDuration  Decimal       @default(0) @map("avg_session_duration") @db.Decimal(8,2)
+  conversionScore     Decimal       @default(0) @map("conversion_score") @db.Decimal(5,2)
+  leadScore           Int           @default(0) @map("lead_score") @db.SmallInt
+  status              VisitorStatus @default(ANONYMOUS)
+  tags                String?       @db.Text
+  notes               String?       @db.Text
+  preferences         Json?         // User preferences and behavior patterns
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  @@index([email], map: "idx_visitor_email")
+  @@index([status], map: "idx_visitor_status")
+  @@index([leadScore], map: "idx_visitor_lead_score")
+  @@index([lastVisit], map: "idx_visitor_last_visit")
+  @@map("visitor_profiles")
+}
+
+// A/B Testing System
+model ABTest {
+  id                      String           @id @default(cuid())
+  name                    String           @db.VarChar(255)
+  description             String?          @db.Text
+  url                     String           @db.VarChar(2048)
+  urlMatchType            URLMatchType     @default(EXACT) @map("url_match_type")
+  status                  ABTestStatus     @default(DRAFT)
+  
+  // Test configuration
+  assignmentType          AssignmentType   @default(FIFTY_FIFTY) @map("assignment_type")
+  trafficSplit            Decimal          @default(100) @map("traffic_split") @db.Decimal(5,2) // Percentage
+  customSplitA            Int              @default(50) @map("custom_split_a")
+  customSplitB            Int              @default(50) @map("custom_split_b")
+  
+  // Content
+  contentA                Json             @map("content_a")
+  contentB                Json             @map("content_b")
+  
+  // Performance metrics
+  visitsA                 Int              @default(0) @map("visits_a")
+  visitsB                 Int              @default(0) @map("visits_b")
+  conversionsA            Int              @default(0) @map("conversions_a")
+  conversionsB            Int              @default(0) @map("conversions_b")
+  conversionRateA         Decimal          @default(0) @map("conversion_rate_a") @db.Decimal(5,4)
+  conversionRateB         Decimal          @default(0) @map("conversion_rate_b") @db.Decimal(5,4)
+  
+  // Statistical analysis
+  confidenceLevel         Decimal          @default(95) @map("confidence_level") @db.Decimal(5,2)
+  minimumSampleSize       Int              @default(100) @map("minimum_sample_size")
+  statisticalSignificance Boolean          @default(false) @map("statistical_significance")
+  winnerVariant           ABVariant?       @map("winner_variant")
+  pValue                  Decimal?         @map("p_value") @db.Decimal(10,8)
+  
+  // Test lifecycle
+  startDate               DateTime?        @map("start_date")
+  endDate                 DateTime?        @map("end_date")
+  autoStop                Boolean          @default(false) @map("auto_stop")
+  maxDuration             Int?             @map("max_duration") // days
+  
+  // Metadata
+  createdAt               DateTime         @default(now()) @map("created_at")
+  updatedAt               DateTime         @updatedAt @map("updated_at")
+  createdBy               String           @map("created_by") @db.VarChar(100)
+  
+  // Relations
+  assignments             ABTestAssignment[]
+  leads                   Lead[]
+
+  @@index([status], map: "idx_abtest_status")
+  @@index([url], map: "idx_abtest_url")
+  @@index([startDate, endDate], map: "idx_abtest_dates")
+  @@index([createdBy], map: "idx_abtest_creator")
+  @@map("ab_tests")
+}
+
+model ABTestAssignment {
+  id              String     @id @default(cuid())
+  testId          String     @map("test_id")
+  visitorUserId   String     @map("visitor_user_id") @db.VarChar(255)
+  variant         ABVariant
+  assignedAt      DateTime   @default(now()) @map("assigned_at")
+  converted       Boolean    @default(false)
+  conversionAt    DateTime?  @map("conversion_at")
+  conversionValue Decimal?   @map("conversion_value") @db.Decimal(12,2)
+  sessionData     Json?      @map("session_data")
+  test            ABTest     @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@unique([testId, visitorUserId])
+  @@index([testId, variant], map: "idx_assignment_test_variant")
+  @@index([converted], map: "idx_assignment_converted")
+  @@map("ab_test_assignments")
+}
+
+// Configuration and settings
+model AppConfiguration {
+  id          String   @id @default(cuid())
+  key         String   @unique @db.VarChar(100)
+  value       String   @db.Text
+  description String?  @db.Text
+  category    String   @db.VarChar(50)
+  dataType    ConfigDataType @default(STRING) @map("data_type")
+  isSecret    Boolean  @default(false) @map("is_secret")
+  isPublic    Boolean  @default(false) @map("is_public") // Can be exposed to frontend
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category], map: "idx_config_category")
+  @@index([isPublic], map: "idx_config_public")
+  @@map("app_configuration")
+}
+
+// Analytics and reporting
+model AnalyticsSnapshot {
+  id              String   @id @default(cuid())
+  date            DateTime @db.Date
+  metric          String   @db.VarChar(100)
+  value           Decimal  @db.Decimal(15,4)
+  category        String   @db.VarChar(50)
+  subcategory     String?  @db.VarChar(50)
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@unique([date, metric, category, subcategory])
+  @@index([date], map: "idx_analytics_date")
+  @@index([metric], map: "idx_analytics_metric")
+  @@index([category], map: "idx_analytics_category")
+  @@map("analytics_snapshots")
+}
+
+// ENUMS
+enum Role {
+  SUPER_ADMIN @map("super_admin")
+  ADMIN       @map("admin")
+  MANAGER     @map("manager")
+  SALES       @map("sales")
+  VIEWER      @map("viewer")
+}
+
+enum ContactPreference {
+  PHONE @map("phone")
+  EMAIL @map("email")
+  BOTH  @map("both")
+  SMS   @map("sms")
+}
+
+enum LeadStatus {
+  NEW            @map("new")
+  CONTACTED      @map("contacted")
+  QUALIFIED      @map("qualified")
+  QUOTE_SENT     @map("quote_sent")
+  PROPOSAL_SENT  @map("proposal_sent")
+  NEGOTIATING    @map("negotiating")
+  WON            @map("won")
+  LOST           @map("lost")
+  NOT_INTERESTED @map("not_interested")
+  FOLLOW_UP      @map("follow_up")
+}
+
+enum LeadPriority {
+  LOW    @map("low")
+  MEDIUM @map("medium")
+  HIGH   @map("high")
+  URGENT @map("urgent")
+}
+
+enum LeadActivityType {
+  CREATED       @map("created")
+  EMAIL_SENT    @map("email_sent")
+  PHONE_CALL    @map("phone_call")
+  MEETING       @map("meeting")
+  QUOTE_SENT    @map("quote_sent")
+  STATUS_CHANGE @map("status_change")
+  NOTE_ADDED    @map("note_added")
+  FOLLOW_UP     @map("follow_up")
+}
+
+enum PropertyType {
+  RESIDENTIAL @map("residential")
+  COMMERCIAL  @map("commercial")
+  INDUSTRIAL  @map("industrial")
+  FARM        @map("farm")
+}
+
+enum RoofType {
+  TILE        @map("tile")
+  SLATE       @map("slate")
+  METAL       @map("metal")
+  FLAT        @map("flat")
+  THATCHED    @map("thatched")
+  COMPOSITE   @map("composite")
+}
+
+enum VisitorStatus {
+  ANONYMOUS    @map("anonymous")
+  IDENTIFIED   @map("identified")
+  LEAD         @map("lead")
+  CUSTOMER     @map("customer")
+  UNQUALIFIED  @map("unqualified")
+}
+
+enum ABTestStatus {
+  DRAFT     @map("draft")
+  ACTIVE    @map("active")
+  PAUSED    @map("paused")
+  COMPLETED @map("completed")
+  ARCHIVED  @map("archived")
+}
+
+enum AssignmentType {
+  FIFTY_FIFTY  @map("fifty_fifty")
+  CUSTOM_SPLIT @map("custom_split")
+  WEIGHTED     @map("weighted")
+}
+
+enum URLMatchType {
+  EXACT   @map("exact")
+  PATTERN @map("pattern")
+  REGEX   @map("regex")
+}
+
+enum ABVariant {
+  A
+  B
+}
+
+enum ConfigDataType {
+  STRING  @map("string")
+  NUMBER  @map("number")
+  BOOLEAN @map("boolean")
+  JSON    @map("json")
+}

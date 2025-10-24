@@ -19,128 +19,20 @@ const AdminSidebar = ({
   onToggleCollapse,
   categories = adminCategories
 }: AdminSidebarProps) => {
-  const [companyName, setCompanyName] = useState('Insighter.Digital');
+  const [companyName, setCompanyName] = useState('Local Power');
 
-  // Load and apply saved theme settings on component mount
+  // Load company name from settings
   useEffect(() => {
-    const loadSavedTheme = () => {
-      if (typeof window !== 'undefined') {
-        const savedSettings = localStorage.getItem('admin-general-settings');
-        if (savedSettings) {
-          try {
-            const settings = JSON.parse(savedSettings);
-            const root = document.documentElement;
-            
-            // Apply navigation theme variables
-            if (settings.navigationBackground) {
-              root.style.setProperty('--admin-nav-bg', settings.navigationBackground);
-              // Force update sidebar background immediately
-              const sidebar = document.querySelector('.admin-sidebar') as HTMLElement;
-              if (sidebar) {
-                sidebar.style.backgroundColor = settings.navigationBackground;
-              }
-            }
-            if (settings.navigationTextColor) {
-              root.style.setProperty('--admin-nav-text', settings.navigationTextColor);
-              // Force update sidebar text color immediately
-              const sidebar = document.querySelector('.admin-sidebar') as HTMLElement;
-              if (sidebar) {
-                sidebar.style.color = settings.navigationTextColor;
-              }
-            }
-            
-            // Apply other theme variables
-            if (settings.primaryButtonBackground) {
-              root.style.setProperty('--admin-btn-primary-bg', settings.primaryButtonBackground);
-            }
-            if (settings.primaryButtonTextColor) {
-              root.style.setProperty('--admin-btn-primary-text', settings.primaryButtonTextColor);
-            }
-            if (settings.primaryButtonHoverBackground) {
-              root.style.setProperty('--admin-btn-primary-hover', settings.primaryButtonHoverBackground);
-            }
-            if (settings.primaryColor) {
-              root.style.setProperty('--admin-primary', settings.primaryColor);
-            }
-            if (settings.backgroundColor) {
-              root.style.setProperty('--admin-bg', settings.backgroundColor);
-            }
-            if (settings.titleColor) {
-              root.style.setProperty('--admin-title', settings.titleColor);
-            }
-            if (settings.subtitleColor) {
-              root.style.setProperty('--admin-subtitle', settings.subtitleColor);
-            }
-            if (settings.surfaceColor) {
-              root.style.setProperty('--admin-surface', settings.surfaceColor);
-            }
-            if (settings.borderColor) {
-              root.style.setProperty('--admin-border', settings.borderColor);
-            }
-            
-            // Update company name if available
-            if (settings.companyName) {
-              setCompanyName(settings.companyName);
-            }
-            
-            // Apply theme class if needed
-            if (settings.theme === 'dark') {
-              document.documentElement.classList.add('dark');
-            }
-            if (settings.compactMode) {
-              document.documentElement.classList.add('compact');
-            }
-          } catch (error) {
-            console.error('Error loading saved theme settings:', error);
-          }
-        }
-      }
-    };
-    
-    loadSavedTheme();
-
-    // Listen for storage changes to update settings in real-time
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'admin-general-settings' && e.newValue) {
-        try {
-          const settings = JSON.parse(e.newValue);
-          if (settings.companyName) {
-            setCompanyName(settings.companyName);
-          }
-        } catch (error) {
-          console.error('Error parsing storage change:', error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  // Additional effect to ensure sidebar colors are applied after component mounts
-  useEffect(() => {
-    const sidebar = document.querySelector('.admin-sidebar') as HTMLElement;
-    if (sidebar) {
-      // Set default colors
-      sidebar.style.backgroundColor = '#146443';
-      sidebar.style.color = '#ffffff';
-      
-      // Load and apply saved colors if they exist
+    if (typeof window !== 'undefined') {
       const savedSettings = localStorage.getItem('admin-general-settings');
       if (savedSettings) {
         try {
           const settings = JSON.parse(savedSettings);
-          if (settings.navigationBackground) {
-            sidebar.style.backgroundColor = settings.navigationBackground;
-          }
-          if (settings.navigationTextColor) {
-            sidebar.style.color = settings.navigationTextColor;
+          if (settings.companyName) {
+            setCompanyName(settings.companyName);
           }
         } catch (error) {
-          console.error('Error applying sidebar colors:', error);
+          console.error('Error loading company name:', error);
         }
       }
     }
@@ -157,7 +49,7 @@ const AdminSidebar = ({
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {/* Header */}
-      <div className="p-4 border-b" style={{ borderColor: 'var(--admin-nav-border, rgba(255,255,255,0.1))' }}>
+      <div className="p-4 border-b border-white border-opacity-10">
         <div className="flex items-center justify-between">
           {!collapsed && (
             <motion.div
@@ -166,10 +58,10 @@ const AdminSidebar = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <h1 className="text-xl font-bold" style={{ color: 'var(--admin-nav-text, #ffffff)' }}>
+              <h1 className="text-xl font-bold text-white">
                 {companyName}
               </h1>
-              <p className="text-xs mt-1" style={{ color: 'var(--admin-nav-text, rgba(255,255,255,0.7))' }}>Analytics Admin Panel</p>
+              <p className="text-xs mt-1 text-white text-opacity-70">Analytics Admin Panel</p>
             </motion.div>
           )}
           
@@ -177,16 +69,7 @@ const AdminSidebar = ({
             onClick={onToggleCollapse}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="p-2 rounded-lg transition-colors"
-            style={{ 
-              color: 'var(--admin-nav-text, #ffffff)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--admin-nav-hover-bg, rgba(255,255,255,0.1))';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
+            className="p-2 rounded-lg transition-colors text-white hover:bg-white hover:bg-opacity-10"
           >
             <svg 
               className="w-5 h-5" 
@@ -212,18 +95,13 @@ const AdminSidebar = ({
             <motion.button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 shadow-lg"
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 relative ${
+                activeCategory === category.id 
+                  ? 'bg-white bg-opacity-20 shadow-lg' 
+                  : 'hover:bg-white hover:bg-opacity-10'
+              }`}
               style={{
-                backgroundColor: 'transparent',
                 color: '#ffffff'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.setProperty('background-color', 'rgba(255, 255, 255, 0.1)', 'important');
-                e.currentTarget.style.setProperty('color', '#ffffff', 'important');
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.setProperty('background-color', 'transparent', 'important');
-                e.currentTarget.style.setProperty('color', '#ffffff', 'important');
               }}
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
@@ -231,6 +109,14 @@ const AdminSidebar = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.3 }}
             >
+              {/* Active indicator bar */}
+              {activeCategory === category.id && (
+                <motion.div
+                  className="absolute left-0 top-2 bottom-2 w-1 bg-white rounded-r-full"
+                  layoutId="activeCategory"
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                />
+              )}
               <div 
                 className="flex-shrink-0"
                 style={{

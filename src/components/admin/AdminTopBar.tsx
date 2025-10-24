@@ -403,19 +403,18 @@ const AdminTopBar = ({ activeCategory, activeTab, onTabChange, onNavigate, categ
         </div>
       </div>
 
-      {/* Dynamic Tab Navigation */}
-      <div className="px-6">
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+      {/* Clean Tab Navigation */}
+      <div className="px-6 border-b border-gray-100">
+        <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
           {currentCategory.tabs.map((tab, index) => (
             <motion.button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`relative px-6 py-3 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+              className={`relative px-6 py-4 text-sm font-medium whitespace-nowrap transition-all duration-200 border-b-2 ${
                 activeTab === tab.id
-                  ? 'border-b-2'
-                  : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-300'
+                  ? 'text-green-600 border-green-500'
+                  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-200'
               }`}
-              style={activeTab === tab.id ? { color: '#146443', borderColor: '#146443' } : {}}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 10 }}
@@ -423,15 +422,6 @@ const AdminTopBar = ({ activeCategory, activeTab, onTabChange, onNavigate, categ
               transition={{ delay: index * 0.1, duration: 0.3 }}
             >
               {tab.name}
-              
-              {/* Active Tab Indicator */}
-              {activeTab === tab.id && (
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500 to-green-600 rounded-full"
-                  layoutId={`activeTab-${activeCategory}`}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              )}
             </motion.button>
           ))}
         </div>

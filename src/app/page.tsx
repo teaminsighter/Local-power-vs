@@ -6,7 +6,7 @@ import { PainAndBenefits } from '@/components/landing/pain-and-benefits';
 import { ProductDetails } from '@/components/landing/product-details';
 import { DurabilityVideo } from '@/components/landing/durability-video';
 import { Process } from '@/components/landing/process';
-import { ProcessCta } from '@/components/landing/process-cta';
+import ProcessCta from '@/components/landing/process-cta';
 import { Testimonials } from '@/components/landing/testimonials';
 import { Consultation } from '@/components/landing/consultation';
 import { FinalCta } from '@/components/landing/final-cta';
@@ -98,7 +98,7 @@ export default function Home() {
       </main>
       <Footer />
       
-      {/* Preserve existing Calculator Modal */}
+      {/* Calculator Modal */}
       <CalculatorModal 
         isOpen={isCalculatorOpen} 
         onClose={() => setIsCalculatorOpen(false)} 

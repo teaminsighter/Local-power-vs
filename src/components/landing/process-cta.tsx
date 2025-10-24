@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-export function ProcessCta() {
+export default function ProcessCta() {
     const scrollToConsultation = () => {
         document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
@@ -41,3 +41,6 @@ export function ProcessCta() {
         </motion.section>
     );
 }
+
+// Named export for backward compatibility
+export { ProcessCta };

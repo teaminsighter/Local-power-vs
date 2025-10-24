@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're Offline - Local Power</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #059669 0%, #065f46 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .features {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .features h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .features ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .features li {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .button {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .retry-button {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .retry-button:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .features {
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .wifi-icon {
+            animation: wifi-pulse 2s infinite;
+        }
+
+        @keyframes wifi-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- WiFi Icon -->
+        <div class="icon">
+            <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3"></line>
+            </svg>
+        </div>
+
+        <h1>You're Offline</h1>
+        <p>It looks like you've lost your internet connection. Don't worry - you can still learn about our solar solutions!</p>
+
+        <div class="features">
+            <h2>Solar Power Benefits</h2>
+            <ul>
+                <li>Save up to 90% on electricity bills</li>
+                <li>25-year warranty on solar panels</li>
+                <li>Government rebates available</li>
+                <li>Professional installation included</li>
+                <li>Monitor your savings in real-time</li>
+                <li>Increase your property value</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button onclick="retryConnection()" class="button retry-button">
+                <span id="retry-text">Try Again</span>
+            </button>
+            <a href="/" class="button">Return Home</a>
+        </div>
+
+        <p style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.7;">
+            Call us at <strong>1800 LOCAL POWER</strong> for immediate assistance
+        </p>
+    </div>
+
+    <script>
+        function retryConnection() {
+            const retryText = document.getElementById('retry-text');
+            retryText.textContent = 'Checking...';
+            
+            // Check if we're back online
+            fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                .then(response => {
+                    if (response.ok) {
+                        retryText.textContent = 'Connected!';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        throw new Error('Still offline');
+                    }
+                })
+                .catch(() => {
+                    retryText.textContent = 'Still Offline';
+                    setTimeout(() => {
+                        retryText.textContent = 'Try Again';
+                    }, 2000);
+                });
+        }
+
+        // Auto-retry when coming back online
+        window.addEventListener('online', () => {
+            console.log('Back online!');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        });
+
+        // Show connection status
+        function updateConnectionStatus() {
+            if (navigator.onLine) {
+                console.log('Online');
+            } else {
+                console.log('Offline');
+            }
+        }
+
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        
+        // Initial check
+        updateConnectionStatus();
+
+        // Add some interactivity to make the page feel alive
+        document.addEventListener('DOMContentLoaded', () => {
+            const icon = document.querySelector('.icon');
+            let rotation = 0;
+            
+            setInterval(() => {
+                rotation += 1;
+                icon.style.transform = `rotate(${rotation}deg)`;
+            }, 100);
+        });
+    </script>
+</body>
+</html>

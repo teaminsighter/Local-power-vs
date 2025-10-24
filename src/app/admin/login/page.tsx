@@ -2,24 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import LoginForm from '@/components/auth/LoginForm';
-import RegisterForm from '@/components/auth/RegisterForm';
 
 const AdminAuthPageContent = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const { isAuthenticated } = useAuth();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (status === 'authenticated' && session) {
       const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/admin';
       sessionStorage.removeItem('redirectAfterLogin');
       router.push(redirectUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [session, status, router]);
 
   const handleAuthSuccess = () => {
     const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/admin';
@@ -59,13 +57,10 @@ const AdminAuthPageContent = () => {
               className="text-center md:text-left"
             >
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {isLogin ? 'Welcome Back' : 'Join Our Team'}
+                Welcome Back
               </h1>
               <p className="text-xl text-gray-600 mb-8">
-                {isLogin 
-                  ? 'Access your admin dashboard to manage solar installations, leads, and analytics.'
-                  : 'Create an account to start managing solar projects and helping customers go green.'
-                }
+                Access your admin dashboard to manage solar installations, leads, and analytics.
               </p>
               
               {/* Features */}
@@ -97,17 +92,10 @@ const AdminAuthPageContent = () => {
               transition={{ delay: 0.3 }}
               className="flex justify-center"
             >
-              {isLogin ? (
-                <LoginForm 
-                  onToggleMode={() => setIsLogin(false)}
-                  onSuccess={handleAuthSuccess}
-                />
-              ) : (
-                <RegisterForm 
-                  onToggleMode={() => setIsLogin(true)}
-                  onSuccess={handleAuthSuccess}
-                />
-              )}
+              <LoginForm 
+                onToggleMode={() => {}} // Removed registration for now
+                onSuccess={handleAuthSuccess}
+              />
             </motion.div>
           </div>
         </div>
@@ -129,11 +117,7 @@ const AdminAuthPageContent = () => {
 };
 
 const AdminAuthPage = () => {
-  return (
-    <AuthProvider>
-      <AdminAuthPageContent />
-    </AuthProvider>
-  );
+  return <AdminAuthPageContent />;
 };
 
 export default AdminAuthPage;

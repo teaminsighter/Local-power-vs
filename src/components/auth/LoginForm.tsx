@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import { signIn, getSession } from 'next-auth/react';
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -11,7 +11,8 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onToggleMode, onSuccess }: LoginFormProps) => {
-  const { login, isLoading, error, clearError } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -41,15 +42,27 @@ const LoginForm = ({ onToggleMode, onSuccess }: LoginFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
+    setError(null);
 
     if (!validateForm()) return;
 
+    setIsLoading(true);
     try {
-      await login(formData.email, formData.password, formData.rememberMe);
-      onSuccess?.();
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Invalid credentials. Please check your email and password.');
+      } else if (result?.ok) {
+        onSuccess?.();
+      }
     } catch (error) {
-      // Error is handled by the auth context
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,7 +72,7 @@ const LoginForm = ({ onToggleMode, onSuccess }: LoginFormProps) => {
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: '' }));
     }
-    if (error) clearError();
+    if (error) setError(null);
   };
 
   return (
@@ -78,10 +91,10 @@ const LoginForm = ({ onToggleMode, onSuccess }: LoginFormProps) => {
         <div className="px-8 py-8">
           {/* Demo Credentials */}
           <div className="rounded-lg p-4 mb-6" style={{ backgroundColor: 'rgba(20, 100, 67, 0.1)', border: '1px solid #146443' }}>
-            <h4 className="font-medium mb-2" style={{ color: '#146443' }}>Demo Credentials:</h4>
+            <h4 className="font-medium mb-2" style={{ color: '#146443' }}>Admin Credentials:</h4>
             <div className="text-sm space-y-1" style={{ color: '#146443' }}>
-              <div><strong>Super Admin:</strong> admin@localpower.com / admin123</div>
-              <div><strong>Admin:</strong> manager@localpower.com / manager123</div>
+              <div><strong>Email:</strong> admin@localpower.ie</div>
+              <div><strong>Password:</strong> LocalPower2025!</div>
             </div>
           </div>
 

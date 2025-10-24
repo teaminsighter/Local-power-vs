@@ -198,21 +198,33 @@ export class VisitorTrackingService {
    */
   private async updateVisitorStats(visitorUserId: string, page: string, stayTime?: number): Promise<void> {
     try {
-      const updates: any = {
-        totalPagesViewed: { increment: 1 },
-        lastVisit: new Date()
-      };
-
-      if (stayTime && stayTime > 0) {
-        updates.totalSessionTime = { increment: stayTime };
-      }
-
-      await prisma.visitorProfile.update({
-        where: { visitorUserId },
-        data: updates
+      // Find existing visitor profile
+      const existingProfile = await prisma.visitorProfile.findUnique({
+        where: { visitorUserId }
       });
+
+      if (existingProfile) {
+        const updates: any = {
+          totalPagesViewed: { increment: 1 },
+          lastVisit: new Date()
+        };
+
+        if (stayTime && stayTime > 0) {
+          updates.totalSessionTime = { increment: stayTime };
+        }
+
+        await prisma.visitorProfile.update({
+          where: { visitorUserId },
+          data: updates
+        });
+      } else {
+        // If profile doesn't exist, create it
+        const fingerprint = this.generateFingerprint('unknown');
+        await this.getOrCreateVisitorProfile(visitorUserId, fingerprint);
+      }
     } catch (error) {
       console.error('Error updating visitor stats:', error);
+      // Don't throw the error to prevent request failures
     }
   }
 

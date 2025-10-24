@@ -2,9 +2,9 @@
 
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import { CheckCircle } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { HeroImage } from '@/components/ui/optimized-image-advanced';
 
 interface HeroProps {
   onOpenCalculator?: () => void;
@@ -51,12 +51,12 @@ export function Hero({ onOpenCalculator }: HeroProps) {
   return (
     <section ref={heroRef} className="relative w-full h-screen min-h-[600px] flex items-center text-white overflow-hidden" id="hero">
       <motion.div style={{ scale: imageScale }} className="absolute inset-0">
-        <Image
+        <HeroImage
           src="https://firebasestorage.googleapis.com/v0/b/localpower-vfcz6.firebasestorage.app/o/LocalPower%2Flocalpower-hero-fmaily.webp?alt=media&token=fb696a49-effa-4c81-b25c-040ed52bb262"
           alt="Solar panels on a residential roof with a happy family in the foreground"
-          fill
           className="object-cover object-right sm:object-center"
-          priority
+          priority={true}
+          quality={90}
         />
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-r from-primary/90 from-0% via-primary/60 via-40% sm:via-50% to-transparent to-70% sm:to-80%" />

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { SessionProvider } from "@/providers/SessionProvider";
+import PerformanceMonitor from "@/components/performance/PerformanceMonitor";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -28,7 +30,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SessionProvider>
+          {children}
+          {process.env.NODE_ENV === 'development' && <PerformanceMonitor />}
+        </SessionProvider>
       </body>
     </html>
   );

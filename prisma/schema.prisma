@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -212,8 +212,8 @@ model ABTestVariant {
   page           LandingPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
   test           ABTest      @relation(fields: [testId], references: [id], onDelete: Cascade)
 
-  @@index([pageId], map: "ab_test_variants_page_id_fkey")
-  @@index([testId], map: "ab_test_variants_test_id_fkey")
+  @@index([pageId], map: "ab_test_variants_page_id_idx")
+  @@index([testId], map: "ab_test_variants_test_id_idx")
   @@map("ab_test_variants")
 }
 

@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { validateAndSanitize, leadFormSchema, paginationSchema } from '../../../lib/validation';
+import { db } from '../../../lib/database/optimized-service';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    // Validate and sanitize input data
+    const validation = validateAndSanitize(leadFormSchema, body);
+    
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Validation failed',
+          errors: validation.errors
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       firstName,
       lastName,
@@ -21,44 +34,39 @@ export async function POST(request: NextRequest) {
       systemDetails,
       source,
       status
-    } = body;
+    } = validation.data;
 
     // Map preferredContact to match the enum
     const contactPreference = preferredContact === 'email' ? 'EMAIL' : 
                              preferredContact === 'phone' ? 'PHONE' : 'BOTH';
 
-    // Create the lead with system details
-    const lead = await prisma.lead.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        phone,
-        contactPreference,
-        bestTimeToCall,
-        status: status || 'NEW',
-        source: source || 'website',
-        score: 75, // Default score for calculator leads
-        tags: `timeframe:${installationTimeframe}${marketingConsent ? ',marketing-consent' : ''}`,
-        notes: additionalNotes || null,
-        systemDetails: {
-          create: {
-            systemSize: systemDetails.systemSize,
-            estimatedCost: systemDetails.estimatedCost,
-            annualSavings: systemDetails.annualSavings,
-            paybackPeriod: systemDetails.paybackPeriod,
-            panelCount: systemDetails.panelCount,
-            roofArea: systemDetails.systemSize * 8, // Rough calculation: 8m² per kW
-            monthlyBill: systemDetails.annualSavings / 12, // Estimate from savings
-            usageKwh: systemDetails.systemSize * 1200, // Rough calculation: 1200 kWh per kW annually
-            address: systemDetails.address || address,
-            propertyType: 'residential', // Default for calculator
-            roofType: 'standard' // Default for calculator
-          }
+    // Create the lead with system details using optimized service
+    const lead = await db.createLead({
+      firstName,
+      lastName,
+      email,
+      phone,
+      contactPreference,
+      bestTimeToCall,
+      status: status || 'NEW',
+      source: source || 'website',
+      score: 75, // Default score for calculator leads
+      tags: `timeframe:${installationTimeframe}${marketingConsent ? ',marketing-consent' : ''}`,
+      notes: additionalNotes || null,
+      systemDetails: {
+        create: {
+          systemSize: systemDetails.systemSize,
+          estimatedCost: systemDetails.estimatedCost,
+          annualSavings: systemDetails.annualSavings,
+          paybackPeriod: systemDetails.paybackPeriod,
+          panelCount: systemDetails.panelCount,
+          roofArea: systemDetails.systemSize * 8, // Rough calculation: 8m² per kW
+          monthlyBill: systemDetails.annualSavings / 12, // Estimate from savings
+          usageKwh: systemDetails.systemSize * 1200, // Rough calculation: 1200 kWh per kW annually
+          address: systemDetails.address || address,
+          propertyType: 'residential', // Default for calculator
+          roofType: 'standard' // Default for calculator
         }
-      },
-      include: {
-        systemDetails: true
       }
     });
 
@@ -68,6 +76,8 @@ export async function POST(request: NextRequest) {
       email: lead.email,
       systemSize: lead.systemDetails?.systemSize
     });
+
+    // Cache invalidation will be added back later
 
     return NextResponse.json({
       success: true,
@@ -86,19 +96,37 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    
+    // Validate query parameters
+    const paramsValidation = validateAndSanitize(paginationSchema, {
+      page: searchParams.get('page') || '1',
+      limit: searchParams.get('limit') || '20'
+    });
+    
+    if (!paramsValidation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Invalid query parameters',
+          errors: paramsValidation.errors
+        },
+        { status: 400 }
+      );
+    }
+
+    const { page, limit: pageSize } = paramsValidation.data;
+    const offset = (page - 1) * pageSize;
+    
+    // Safely get and validate other parameters
     const status = searchParams.get('status');
-    const priority = searchParams.get('priority');
+    const priority = searchParams.get('priority');  
     const source = searchParams.get('source');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = parseInt(searchParams.get('offset') || '0');
     
     // Check if demo data should be used
     const useDemoData = searchParams.get('demo') === 'true';
@@ -127,7 +155,7 @@ export async function GET(request: NextRequest) {
           }
           
           // Apply pagination
-          const paginatedLeads = filteredLeads.slice(offset, offset + limit);
+          const paginatedLeads = filteredLeads.slice(offset, offset + pageSize);
           
           return NextResponse.json({
             success: true,
@@ -175,22 +203,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Execute query
-    const leads = await prisma.lead.findMany({
-      where,
-      include: {
-        systemDetails: true
-      },
-      orderBy: [
-        { score: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      take: limit,
-      skip: offset
-    });
+    // Execute query using optimized service
+    const result = await db.getLeadsWithPagination(where, page, pageSize);
 
     // Transform leads to include calculated priority
-    const transformedLeads = leads.map(lead => ({
+    const transformedLeads = result.data.map(lead => ({
       ...lead,
       priority: calculatePriority(lead.score),
       fullName: `${lead.firstName} ${lead.lastName}`,
@@ -198,7 +215,16 @@ export async function GET(request: NextRequest) {
       estimatedValue: lead.systemDetails?.estimatedCost || 0
     }));
 
-    return NextResponse.json(transformedLeads);
+    return NextResponse.json({
+      success: true,
+      leads: transformedLeads,
+      pagination: {
+        page,
+        pageSize,
+        hasMore: result.hasMore,
+        total: result.total
+      }
+    });
 
   } catch (error) {
     console.error('Error fetching leads:', error);
@@ -211,8 +237,6 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
