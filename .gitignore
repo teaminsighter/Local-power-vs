@@ -52,4 +52,5 @@ logs
 *.tmp
 *.temp
 *.backup
-*.oldnohup.out
+*.old
+nohup.out
